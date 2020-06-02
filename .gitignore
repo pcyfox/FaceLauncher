@@ -1,0 +1,6 @@
+/local.properties
+/app/build/
+/.idea/
+/.gradle/
+/module_arcface/build/
+/build/

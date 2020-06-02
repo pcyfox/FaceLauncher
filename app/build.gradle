@@ -6,7 +6,7 @@ apply plugin: 'kotlin-kapt'
 android {
     compileSdkVersion project.compileSdkVersion
     defaultConfig {
-        applicationId "com.example.launcher"
+        applicationId "com.tk.facelauncher"
         minSdkVersion project.minSdkVersion
         targetSdkVersion project.androidTargetSdk
         versionCode 1
