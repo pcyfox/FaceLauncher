@@ -1,0 +1,35 @@
+apply plugin: 'com.android.library'
+
+def rootDependencies = rootProject.ext.dependencies
+android {
+    compileSdkVersion project.compileSdkVersion
+    defaultConfig {
+        minSdkVersion project.minSdkVersion
+        targetSdkVersion project.androidTargetSdk
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        resConfigs('zh-rCN')
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            consumerProguardFiles 'proguard-rules.pro'
+        }
+
+        debug {
+            minifyEnabled false
+        }
+    }
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    //@see :https://github.com/Blankj/AndroidUtilCode
+    api 'com.blankj:utilcode:1.24.7'
+    api 'com.elvishew:xlog:1.6.1'
+    api rootDependencies.appcompat
+}

@@ -1,0 +1,58 @@
+apply plugin: 'com.android.library'
+def rootDependencies = rootProject.ext.dependencies
+android {
+    compileSdkVersion project.compileSdkVersion
+    defaultConfig {
+        minSdkVersion project.minSdkVersion
+        targetSdkVersion project.androidTargetSdk
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        resConfigs('zh-rCN')
+        ndk {
+            abiFilters 'armeabi', 'armeabi-v7a'
+        }
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            consumerProguardFiles 'proguard-rules.pro'
+        }
+
+        debug {
+            minifyEnabled false
+        }
+    }
+}
+
+//较为通用的才放在这里,供业务类型模块使用
+dependencies {
+    api fileTree(dir: 'libs', include: ['*.jar'])
+
+  //  api rootDependencies.recyclerview
+    api rootDependencies.constraintlayout
+    api rootDependencies.appcompat
+    api rootDependencies.annotation
+    //  api  rootDependencies.material
+    api rootDependencies.liveEvent
+    api rootDependencies.gson
+    api(rootDependencies.glide) {
+        exclude group: 'com.android.support'
+    }
+    //--------------kotlin---------------------
+    api rootDependencies.kotlin
+    // ------------For ViewModel and LiveData-------------
+    api(rootDependencies.lifecycle) {
+        exclude group: 'com.android.support'
+    }
+
+    api rootDependencies.rxjava2
+    api rootDependencies.rxandroid
+    api rootDependencies.ktx
+    api rootDependencies.bugly
+    api 'com.wang.avi:library:2.1.3'
+
+
+}

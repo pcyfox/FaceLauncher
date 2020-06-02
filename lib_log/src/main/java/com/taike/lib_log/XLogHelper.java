@@ -1,0 +1,60 @@
+package com.taike.lib_log;
+
+import android.text.TextUtils;
+import android.util.Log;
+
+import com.elvishew.xlog.LogConfiguration;
+import com.elvishew.xlog.LogLevel;
+import com.elvishew.xlog.XLog;
+import com.elvishew.xlog.printer.AndroidPrinter;
+import com.elvishew.xlog.printer.Printer;
+import com.elvishew.xlog.printer.file.FilePrinter;
+import com.elvishew.xlog.printer.file.backup.NeverBackupStrategy;
+import com.elvishew.xlog.printer.file.clean.FileLastModifiedCleanStrategy;
+import com.elvishew.xlog.printer.file.naming.DateFileNameGenerator;
+import com.taike.lib_log.printer.CloudLogPrinter;
+
+public class XLogHelper {
+    private static CloudLogPrinter printer;
+    private static final String TAG = "XLogHelper";
+
+    /**
+     * @param mCloudLogPrinter 自定义打印前
+     * @param LogDir           日志存储路径
+     * @param tag              标签
+     * @param logRprFileName    日志文件名前缀
+     */
+    public static void initLog(CloudLogPrinter mCloudLogPrinter, String LogDir, String tag, final String logRprFileName) {
+        Log.d(TAG, "initLog() called with: mCloudLogPrinter = [" + mCloudLogPrinter + "], LogDir = [" + LogDir + "], tag = [" + tag + "], prFileName = [" + logRprFileName + "]");
+        printer = mCloudLogPrinter;
+        tag = TextUtils.isEmpty(tag) ? "xLog" : tag;
+        LogConfiguration logConfig = new LogConfiguration.Builder()
+                .logLevel(LogLevel.ALL)
+                .tag(tag)
+                .build();
+
+        Printer filePrinter = new FilePrinter
+                .Builder(LogDir)
+                .fileNameGenerator(new DateFileNameGenerator() {
+                    @Override
+                    public String generateFileName(int logLevel, long timestamp) {
+                        if (logRprFileName == null) {
+                            return super.generateFileName(logLevel, timestamp) + ".log";
+                        }
+                        return logRprFileName + "_" + super.generateFileName(logLevel, timestamp) + ".log";
+                    }
+                })
+                .backupStrategy(new NeverBackupStrategy())
+                .cleanStrategy(new FileLastModifiedCleanStrategy(3 * 24 * 3600 * 1000))
+                .build();
+
+        XLog.init(logConfig, filePrinter, new AndroidPrinter(), mCloudLogPrinter);
+    }
+
+
+    public static void println(int level, String tag, String content) {
+        if (printer != null) {
+            printer.println(level, tag, content);
+        }
+    }
+}

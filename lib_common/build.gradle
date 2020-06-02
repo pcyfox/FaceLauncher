@@ -1,0 +1,32 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+// Retrofit的正式环境BaseUrl
+def releaseBaseUrl = "http://192.168.8.95/"
+def debugBaseUrl = "http://192.168.8.95/"
+
+
+android {
+    compileSdkVersion project.compileSdkVersion
+    defaultConfig {
+        minSdkVersion minSdkVersion
+        targetSdkVersion androidTargetSdk
+        versionCode 1
+        versionName "1.0"
+        //在这个模块的资源命名必需以这个字符开头，否则编译器会给出警告
+        resourcePrefix 'common_'
+        buildConfigField("String", "BASE_URL", String.format("\"%s\"", releaseBaseUrl.toString()))
+        buildConfigField("String", "DEBUG_URL", String.format("\"%s\"", debugBaseUrl.toString()))
+    }
+
+    dataBinding {
+        enabled true
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    api project(path: ':lib_third')
+    api project(path: ':lib_utils')
+    //作为各个Module（非lib，lib是一个个与业务无关的的组件）间沟通的桥梁
+}
