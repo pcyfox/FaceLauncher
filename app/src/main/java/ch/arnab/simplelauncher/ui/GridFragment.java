@@ -1,4 +1,4 @@
-package ch.arnab.simplelauncher;
+package ch.arnab.simplelauncher.ui;
 
 /*
  * Created by Thomas Barrasso on 9/11/12.

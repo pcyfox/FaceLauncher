@@ -13,6 +13,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Comparator;
 
+import ch.arnab.simplelauncher.receiver.PackageIntentReceiver;
+
 /**
  * @credit http://developer.android.com/reference/android/content/AsyncTaskLoader.html
  */

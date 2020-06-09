@@ -1,4 +1,4 @@
-package ch.arnab.simplelauncher;
+package ch.arnab.simplelauncher.ui;
 
 import android.os.Bundle;
 
@@ -7,6 +7,10 @@ import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 
 import java.util.ArrayList;
+
+import ch.arnab.simplelauncher.AppListAdapter;
+import ch.arnab.simplelauncher.AppModel;
+import ch.arnab.simplelauncher.AppsLoader;
 
 /**
  * Created by Arnab Chakraborty

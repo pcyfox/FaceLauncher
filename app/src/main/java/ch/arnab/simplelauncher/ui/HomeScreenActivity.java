@@ -1,4 +1,4 @@
-package ch.arnab.simplelauncher;
+package ch.arnab.simplelauncher.ui;
 
 import android.os.Bundle;
 
@@ -8,7 +8,9 @@ import androidx.fragment.app.FragmentActivity;
 
 import com.tk.facelauncher.R;
 
-public class HomeScreen extends FragmentActivity {
+import ch.arnab.simplelauncher.App;
+
+public class HomeScreenActivity extends FragmentActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

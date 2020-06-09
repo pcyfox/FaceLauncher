@@ -10,7 +10,7 @@
 
     <fragment
         android:id="@+id/apps_grid"
-        android:name="ch.arnab.simplelauncher.AppsGridFragment"
+        android:name="ch.arnab.simplelauncher.ui.AppsGridFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

@@ -1,10 +1,8 @@
 package ch.arnab.simplelauncher.ui
 
-import android.content.Intent
 import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import ch.arnab.simplelauncher.App
-import ch.arnab.simplelauncher.HomeScreen
 import com.blankj.utilcode.constant.PermissionConstants
 import com.blankj.utilcode.util.AppUtils
 import com.blankj.utilcode.util.PermissionUtils
@@ -46,7 +44,7 @@ class MainActivity(override val layoutId: Int = R.layout.activity_main) : BaseAc
 
     private fun goNextActivity() {
         AppUtils.launchApp(pkgName)
-       //; startActivity(Intent(this@MainActivity, HomeScreen::class.java))
+       // startActivity(Intent(this@MainActivity, HomeScreen::class.java))
     }
 
     private fun questPermission() {
@@ -126,6 +124,4 @@ class MainActivity(override val layoutId: Int = R.layout.activity_main) : BaseAc
         }, "", "")
         arcFaceDialog?.show()
     }
-
-
 }

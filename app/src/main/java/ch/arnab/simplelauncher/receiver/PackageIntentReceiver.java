@@ -1,9 +1,11 @@
-package ch.arnab.simplelauncher;
+package ch.arnab.simplelauncher.receiver;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+
+import ch.arnab.simplelauncher.AppsLoader;
 
 /**
  * Helper class to look for interesting changes to the installed apps
