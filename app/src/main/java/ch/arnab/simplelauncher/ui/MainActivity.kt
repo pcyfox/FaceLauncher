@@ -1,34 +1,55 @@
-package ch.arnab.simplelauncher
+package ch.arnab.simplelauncher.ui
 
 import android.content.Intent
-import android.os.Bundle
-
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
+import ch.arnab.simplelauncher.App
+import ch.arnab.simplelauncher.HomeScreen
 import com.blankj.utilcode.constant.PermissionConstants
+import com.blankj.utilcode.util.AppUtils
 import com.blankj.utilcode.util.PermissionUtils
 import com.blankj.utilcode.util.ToastUtils
 import com.elvishew.xlog.XLog
-import com.tk.facelauncher.R
+import com.taike.lib_common.base.BaseActivity
+import com.taike.lib_common.base.BaseViewModel
 import com.taike.lib_common.ext.postDelayed
 import com.taike.lib_common.ext.toastLong
 import com.taike.module_arcface.arcface.ImportFaceUtils
 import com.taike.module_arcface.ui.activity.ArcFaceDialog
 import com.taike.module_arcface.ui.activity.ArcFaceUtils
-
+import com.tk.facelauncher.R
+import com.tk.facelauncher.databinding.ActivityMainBinding
 import java.io.File
 
-class MainActivity : AppCompatActivity() {
+class MainActivity(override val layoutId: Int = R.layout.activity_main) : BaseActivity<ActivityMainBinding, BaseViewModel>() {
+    private val pkgName = "com.taike.edu.stu"
     private val faceDir = ImportFaceUtils.ROOT_DIR
     private var arcFaceDialog: ArcFaceDialog? = null
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+    override var isFullScreen = true
+    override fun onCreateOver() {
+        super.onCreateOver()
         if (App.isRegister) {
-            startActivity(Intent(this@MainActivity, HomeScreen::class.java))
-            finish()
+            goNextActivity()
             return
         }
+        questPermission()
+    }
+
+    override fun createViewModel(): BaseViewModel {
+        return ViewModelProvider(this).get(BaseViewModel::class.java)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        App.isRegister = false
+    }
+
+    private fun goNextActivity() {
+        AppUtils.launchApp(pkgName)
+       //; startActivity(Intent(this@MainActivity, HomeScreen::class.java))
+    }
+
+    private fun questPermission() {
         PermissionUtils.permission(PermissionConstants.CAMERA,
                 PermissionConstants.STORAGE, PermissionConstants.PHONE).callback(object : PermissionUtils.FullCallback {
             override fun onGranted(permissionsGranted: MutableList<String>?) {
@@ -86,8 +107,7 @@ class MainActivity : AppCompatActivity() {
             override fun onSuccess(id: String?) {
                 toastLong("$id   识别成功")
                 postDelayed(400, Runnable {
-                    startActivity(Intent(this@MainActivity, HomeScreen::class.java))
-                    finish()
+                    goNextActivity()
                     arcFaceDialog?.dismiss()
                     App.isRegister = true
                 })
@@ -106,5 +126,6 @@ class MainActivity : AppCompatActivity() {
         }, "", "")
         arcFaceDialog?.show()
     }
+
 
 }

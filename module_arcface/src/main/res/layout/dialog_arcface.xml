@@ -8,12 +8,11 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@mipmap/arc_dialog_bg"
+        android:background="@drawable/arc_dialog_bg"
         android:paddingStart="30dp"
         android:paddingTop="30dp"
         android:paddingEnd="30dp"
         android:paddingBottom="30dp">
-
 
         <TextView
             android:id="@+id/tv_name"
@@ -50,7 +49,6 @@
             android:layout_width="228dp"
             android:layout_height="228dp"
             android:background="@mipmap/img42"
-            android:src="@mipmap/img25"
             app:layout_constraintBottom_toTopOf="@+id/tip"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

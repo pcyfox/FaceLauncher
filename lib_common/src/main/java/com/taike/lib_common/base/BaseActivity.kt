@@ -76,15 +76,6 @@ abstract class BaseActivity<VDB : ViewDataBinding, VM : BaseViewModel> : Fragmen
         progress?.dismiss()
     }
 
-    private fun statusBar() {
-//       val mStatusBarManager = (StatusBarManager) mContext.getSystemService(Context.STATUS_BAR_SERVICE); 
-//       //3. 禁止下拉状态栏
-//        mStatusBarManager.disable(StatusBarManager.DISABLE_EXPAND); 
-//       // 4. 解除禁止
-//        mStatusBarManager.disable(StatusBarManager.DISABLE_NONE);
-
-    }
-
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)

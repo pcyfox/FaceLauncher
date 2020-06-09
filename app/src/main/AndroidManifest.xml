@@ -30,7 +30,7 @@
         </activity>
 
         <activity
-            android:name="ch.arnab.simplelauncher.MainActivity"
+            android:name="ch.arnab.simplelauncher.ui.MainActivity"
             android:launchMode="singleTask"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
