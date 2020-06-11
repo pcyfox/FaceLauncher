@@ -119,7 +119,7 @@ class MainActivity(override val layoutId: Int = R.layout.activity_main) : BaseAc
             }
 
             override fun onDismiss() {
-
+                fullScreenImmersive()
             }
         }, "", "")
         arcFaceDialog?.show()

@@ -47,11 +47,7 @@ abstract class BaseActivity<VDB : ViewDataBinding, VM : BaseViewModel> : Fragmen
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (isFullScreen) {
-            requestWindowFeature(Window.FEATURE_NO_TITLE)
-            //全屏
-            window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                    WindowManager.LayoutParams.FLAG_FULLSCREEN)
-            hideNavigationBar()
+            fullScreen()
         }
         initViewDataBinding()
         observeData()
@@ -74,6 +70,20 @@ abstract class BaseActivity<VDB : ViewDataBinding, VM : BaseViewModel> : Fragmen
 
     protected fun hideProgress() {
         progress?.dismiss()
+    }
+
+    private fun fullScreen(){
+        requestWindowFeature(Window.FEATURE_NO_TITLE)
+        //全屏
+        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        hideNavigationBar()
+    }
+
+    fun fullScreenImmersive(view: View=window.decorView) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            view.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_FULLSCREEN
+        }
     }
 
 
