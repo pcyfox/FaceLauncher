@@ -1,4 +1,4 @@
-package com.taike.module_arcface.ui.activity;
+package com.taike.module_arcface.ui.dialog;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;

@@ -1,10 +1,9 @@
-package com.taike.module_arcface.ui.activity;
+package com.taike.module_arcface.ui.dialog;
 
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.hardware.Camera;
-import android.os.Build;
 import android.os.CountDownTimer;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -16,7 +15,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 
 import com.arcsoft.face.AgeInfo;
 import com.arcsoft.face.ErrorInfo;
@@ -24,7 +22,6 @@ import com.arcsoft.face.FaceEngine;
 import com.arcsoft.face.FaceFeature;
 import com.arcsoft.face.GenderInfo;
 import com.arcsoft.face.LivenessInfo;
-import com.arcsoft.face.VersionInfo;
 import com.arcsoft.face.enums.DetectFaceOrientPriority;
 import com.arcsoft.face.enums.DetectMode;
 import com.blankj.utilcode.util.ToastUtils;
@@ -86,10 +83,10 @@ public class ArcFaceDialog extends BaseDialog<DialogArcfaceBinding> implements V
 
     @Override
     protected void initView() {
-        tip = binding.tip;
+        tip = binding.tvTip;
         previewView = binding.singleCameraTexturePreview;
         faceRectView = binding.singleCameraFaceRectView;
-        scanImage = binding.scanImage;
+        scanImage = binding.ivScanImage;
         FaceServer.getInstance().init(getContext());
         compareResultList = new ArrayList<>();
         cdTimer = new CountDownTimer(30000, 1000) {
@@ -123,7 +120,6 @@ public class ArcFaceDialog extends BaseDialog<DialogArcfaceBinding> implements V
         this.stuId = stuId;
         binding.tvName.setText(stuName);
     }
-
 
 
     @Override
