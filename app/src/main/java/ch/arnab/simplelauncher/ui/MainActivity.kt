@@ -20,7 +20,7 @@ import com.tk.facelauncher.databinding.ActivityMainBinding
 import java.io.File
 
 class MainActivity(override val layoutId: Int = R.layout.activity_main) : BaseActivity<ActivityMainBinding, BaseViewModel>() {
-    private val pkgName = "com.taike.edu.stu"
+    private val pkgName = "com.ctrl.freesky"
     private val faceDir = ImportFaceUtils.ROOT_DIR
     private var arcFaceDialog: ArcFaceDialog? = null
     override var isFullScreen = true
