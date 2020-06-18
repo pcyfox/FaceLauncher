@@ -47,7 +47,7 @@ class MainActivity(override val layoutId: Int = R.layout.activity_main) : BaseAc
         arcFaceFragment = fl_recognize_face as ArcFaceFragment
         arcFaceFragment?.stop()
 
-        postDelayed(3 * 1000, Runnable {
+        postDelayed(8 * 1000, Runnable {
             arcFaceFragment?.start()
             MaskUtils.hide(this, "mask_splash")
         })

@@ -116,7 +116,11 @@ class ArcFaceFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
         initView()
         initEngine()
-        start()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        faceRectView?.postDelayed(Runnable { start() }, 100)
     }
 
     private fun initView() {
@@ -695,6 +699,10 @@ class ArcFaceFragment : Fragment() {
         view!!.clearAnimation()
     }
 
+    override fun onStop() {
+        super.onStop()
+        cameraHelper?.stop()
+    }
 
     override fun onDestroy() {
         super.onDestroy()
