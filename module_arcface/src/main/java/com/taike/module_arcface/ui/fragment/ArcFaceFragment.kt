@@ -686,7 +686,7 @@ class ArcFaceFragment : Fragment() {
     }
 
     private fun startAnimation(view: View) {
-        val ta1 = TranslateAnimation(0f, 0f, DpPxUtils.dip2px(context, 0f).toFloat(), DpPxUtils.dip2px(context, 223f).toFloat())
+        val ta1 = TranslateAnimation(0f, 0f, DpPxUtils.dip2px(context, 0f).toFloat(), iv_borImage.height.toFloat())
         ta1.duration = 3000
         //ta1.setStartTime(0);
         //ta1.setRepeatCount(Integer.MAX_VALUE);

@@ -37,8 +37,8 @@
 
         <com.taike.module_arcface.arcface.draw.FaceRectView
             android:id="@+id/single_camera_face_rect_view"
-            android:layout_width="match_parent"
-            android:layout_height="400dp"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="@+id/single_camera_texture_preview"
             app:layout_constraintEnd_toEndOf="@+id/single_camera_texture_preview"
             app:layout_constraintStart_toStartOf="@+id/single_camera_texture_preview"
@@ -46,25 +46,26 @@
 
         <ImageView
             android:id="@+id/iv_borImage"
-            android:layout_width="228dp"
-            android:layout_height="228dp"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             android:background="@mipmap/img42"
-            app:layout_constraintBottom_toTopOf="@+id/tv_tip"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintBottom_toBottomOf="@+id/single_camera_texture_preview"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toEndOf="@+id/single_camera_texture_preview"
+            app:layout_constraintStart_toStartOf="@+id/single_camera_texture_preview"
+            app:layout_constraintTop_toTopOf="@+id/single_camera_texture_preview"
+            app:layout_constraintWidth_percent="0.52" />
 
 
         <ImageView
             android:id="@+id/iv_scanImage"
-            android:layout_width="228dp"
-            android:layout_height="5dp"
+            android:layout_width="0dp"
+            android:layout_height="3dp"
             android:scaleType="fitXY"
             android:src="@mipmap/img30"
-            app:layout_constraintBottom_toTopOf="@+id/tv_tip"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintEnd_toEndOf="@+id/iv_borImage"
+            app:layout_constraintStart_toStartOf="@+id/iv_borImage"
+            app:layout_constraintTop_toTopOf="@+id/iv_borImage" />
 
         <TextView
             android:id="@+id/tv_tip"
