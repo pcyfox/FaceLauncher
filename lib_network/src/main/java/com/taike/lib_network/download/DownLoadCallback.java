@@ -20,7 +20,7 @@ public abstract class DownLoadCallback {
 
 
     public void onError(String msg) {
-        XLog.e("DownLoadCallback:" + msg);
+        XLog.w("DownLoadCallback:" + msg);
     }
 
 

@@ -21,13 +21,11 @@
 #-renamesourcefileattribute SourceFile
 
 -keep class android.databinding.** { *; }
-
--keep class com.taike.edu.module_home.entity.**{ *;}
-
-#---------------------ARoiuter---------------------
--keep public class com.alibaba.android.arouter.routes.**{*;}
--keep public class com.alibaba.android.arouter.facade.**{*;}
--keep class * implements com.alibaba.android.arouter.facade.template.ISyringe{*;}
+#-libraryjars libs/arcsoft_face.jar
+#-libraryjars libs/arcsoft_image_util.jar
+-keep class com.arcsoft.face.**{*;}
+-keep class com.arcsoft.imageutil.**{*;}
+-keep class com.taike.module_arcface.arcface.FaceServer{ *; }
 
 
 

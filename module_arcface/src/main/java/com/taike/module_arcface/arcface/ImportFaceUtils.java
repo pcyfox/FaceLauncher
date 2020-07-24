@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
+import android.util.Log;
 
 import com.arcsoft.imageutil.ArcSoftImageFormat;
 import com.arcsoft.imageutil.ArcSoftImageUtil;
@@ -17,7 +18,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ImportFaceUtils {
-
+    private static final String TAG = "ImportFaceUtils";
     //注册图所在的目录
     public static final String ROOT_DIR = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "TKArcFace";
     //  private static final String REGISTER_DIR = ROOT_DIR + File.separator + "register";
@@ -68,9 +69,9 @@ public class ImportFaceUtils {
 
     //注册人脸
     public void doRegister(final Context context, final String faceDir, final ImportFaceCallBack importFaceCallBack) {
+        Log.d(TAG, "doRegister() called with: context = [" + context + "], faceDir = [" + faceDir + "]");
         executorService = Executors.newSingleThreadExecutor();
         File dir = new File(faceDir);
-        XLog.d("doRegister   faceDir: " + faceDir);
         if (!dir.exists() || !dir.isDirectory()) {
             importFaceCallBack.onError(context.getString(R.string.batch_process_path_is_not_dir, faceDir));
             return;
@@ -93,6 +94,7 @@ public class ImportFaceUtils {
                     final File jpgFile = jpgFiles[i];
                     Bitmap bitmap = BitmapFactory.decodeFile(jpgFile.getAbsolutePath());
                     if (bitmap == null) {
+                        Log.e(TAG, "doRegister() decodeFile fail " + jpgFile.getAbsolutePath());
                         File failedFile = new File(REGISTER_FAILED_DIR + File.separator + jpgFile.getName());
                         if (!failedFile.getParentFile().exists()) {
                             failedFile.getParentFile().mkdirs();
@@ -112,15 +114,6 @@ public class ImportFaceUtils {
                     byte[] bgr24 = ArcSoftImageUtil.createImageData(bitmap.getWidth(), bitmap.getHeight(), ArcSoftImageFormat.BGR24);
                     int transformCode = ArcSoftImageUtil.bitmapToImageData(bitmap, bgr24, ArcSoftImageFormat.BGR24);
                     if (transformCode != ArcSoftImageUtilError.CODE_SUCCESS) {
-                  /*      runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                progressDialog.dismiss();
-                                tvNotificationRegisterResult.append("");
-                            }
-                        });*/
-                        //importFaceCallBack.onError("");
-
                         return;
                     }
                     boolean success = FaceServer.getInstance().registerBgr24(context, bgr24, bitmap.getWidth(), bitmap.getHeight(), jpgFile.getName().substring(0, jpgFile.getName().lastIndexOf(".")));

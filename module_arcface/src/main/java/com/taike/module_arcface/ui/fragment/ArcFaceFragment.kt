@@ -118,10 +118,7 @@ class ArcFaceFragment : Fragment() {
         initEngine()
     }
 
-    override fun onResume() {
-        super.onResume()
-        faceRectView?.postDelayed(Runnable { start() }, 100)
-    }
+
 
     private fun initView() {
         faceRectView = single_camera_face_rect_view
@@ -355,6 +352,10 @@ class ArcFaceFragment : Fragment() {
                 //XLog.d("onCameraConfigurationChanged: " + cameraID + "  " + displayOrientation);
             }
         }
+        initCameraHelper(cameraListener)
+    }
+
+    private fun initCameraHelper(cameraListener: CameraListener) {
         cameraHelper = CameraHelper.Builder()
                 .previewViewSize(Point(single_camera_texture_preview!!.measuredWidth, single_camera_texture_preview!!.measuredHeight))
                 .rotation(activity!!.window.windowManager.defaultDisplay.rotation)
@@ -364,7 +365,11 @@ class ArcFaceFragment : Fragment() {
                 .cameraListener(cameraListener)
                 .build()
         cameraHelper?.init()
-        cameraHelper?.start()
+        try {
+            cameraHelper?.start()
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        }
     }
 
     private fun searchFace(frFace: FaceFeature, requestId: Int) {
@@ -696,7 +701,7 @@ class ArcFaceFragment : Fragment() {
     }
 
     private fun stopAnimation(view: View?) {
-        view!!.clearAnimation()
+        view?.clearAnimation()
     }
 
     override fun onStop() {

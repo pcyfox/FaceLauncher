@@ -2,13 +2,12 @@ package ch.arnab.simplelauncher.ui
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import ch.arnab.simplelauncher.App
 import com.blankj.utilcode.constant.PermissionConstants
-import com.blankj.utilcode.util.AppUtils
-import com.blankj.utilcode.util.PermissionUtils
-import com.blankj.utilcode.util.ToastUtils
+import com.blankj.utilcode.util.*
 import com.elvishew.xlog.XLog
 import com.taike.lib_common.base.BaseActivity
 import com.taike.lib_common.base.BaseViewModel
@@ -27,29 +26,36 @@ import java.io.File
 import java.lang.Exception
 
 class MainActivity(override val layoutId: Int = R.layout.activity_main) : BaseActivity<ActivityMainBinding, BaseViewModel>() {
+    private val firstStart = "firstStart"
     private val pkgName = "com.ctrl.freesky"
     private val faceDir = ImportFaceUtils.ROOT_DIR
     private var arcFaceFragment: ArcFaceFragment? = null
     private val notFindAppTip = "未找到待启动应用,请点击后重试！"
     override var isFullScreen = true
+    private var isMaskShowing = true
+    private var isHasPermission = false
+    private val TAG = "MainActivity"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         MaskUtils.show(this, View.inflate(this, R.layout.mask_splash, null), "mask_splash")
+        isMaskShowing = true
     }
+
 
     override fun onCreateOver() {
         super.onCreateOver()
-        if (App.isRegister) {
-            goNextActivity()
-            return
-        }
         questPermission()
         arcFaceFragment = fl_recognize_face as ArcFaceFragment
         arcFaceFragment?.stop()
 
         postDelayed(8 * 1000, Runnable {
-            arcFaceFragment?.start()
             MaskUtils.hide(this, "mask_splash")
+            isMaskShowing = false
+            if (isHasPermission) {
+                arcFaceFragment?.start()
+            } else {
+                toastLong("应用程序未获得完整授权，无法继续")
+            }
         })
     }
 
@@ -88,9 +94,19 @@ class MainActivity(override val layoutId: Int = R.layout.activity_main) : BaseAc
     }
 
     private fun questPermission() {
-        PermissionUtils.permission(PermissionConstants.CAMERA,
-                PermissionConstants.STORAGE, PermissionConstants.PHONE).callback(object : PermissionUtils.FullCallback {
+        PermissionUtils.permission(
+                PermissionConstants.CAMERA,
+                PermissionConstants.STORAGE,
+                PermissionConstants.PHONE).callback(object : PermissionUtils.FullCallback {
             override fun onGranted(permissionsGranted: MutableList<String>?) {
+                Log.d(TAG, "onGranted() called with: permissionsGranted = $permissionsGranted")
+                isHasPermission = permissionsGranted != null && permissionsGranted.size >= 3
+                if (isHasPermission) {
+                    if (!SPUtils.getInstance().getBoolean(firstStart, false)) {
+                        FileUtils.deleteAllInDir(faceDir)
+                        SPUtils.getInstance().put(firstStart, true)
+                    }
+                }
                 val file = File(faceDir)
                 if (!file.exists()) {
                     file.mkdir()
@@ -99,7 +115,7 @@ class MainActivity(override val layoutId: Int = R.layout.activity_main) : BaseAc
                 ArcFaceUtils.initFace(this@MainActivity, object : ArcFaceUtils.ArcfaceCallback {
                     override fun onSuccess() {
                         ToastUtils.showLong("人脸识别激活成功")
-                        XLog.e("initFace success!")
+                        XLog.i("initFace success!")
                         recognizeFace()
                     }
 
@@ -108,7 +124,9 @@ class MainActivity(override val layoutId: Int = R.layout.activity_main) : BaseAc
                     }
 
                 })
-
+                if (!isMaskShowing) {
+                    arcFaceFragment?.start()
+                }
             }
 
             override fun onDenied(permissionsDeniedForever: MutableList<String>?, permissionsDenied: MutableList<String>?) {
@@ -135,7 +153,6 @@ class MainActivity(override val layoutId: Int = R.layout.activity_main) : BaseAc
                 toastLong("$id   识别成功")
                 postDelayed(400, Runnable {
                     goNextActivity()
-                    App.isRegister = true
                 })
             }
 

@@ -4,27 +4,41 @@
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/activity_bg">
+        android:background="@drawable/bg_activity_main">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/gl_top"
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.05" />
+
+        <TextView
+            android:id="@+id/tv_tips_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="温馨提示"
+            android:textColor="@color/common_white"
+            android:textSize="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/gl_top" />
 
         <TextView
             android:id="@+id/tv_tips"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
-            android:background="@drawable/stroke_bg"
-            android:elevation="4dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="10dp"
             android:gravity="center"
-            android:lineSpacingMultiplier="1.3"
-            android:paddingStart="15dp"
-            android:paddingTop="35dp"
-            android:paddingEnd="15dp"
-            android:paddingBottom="20dp"
-            android:text="温馨提示：\n 为确保实验室顶装系统在安全环境中运行，需要使用人脸进行生物特征验证授权，待授权后自动进入系统。"
-            android:textSize="24dp"
+            android:text="为确保实验室顶装系统在安全环境中运行,需要使用人脸进行生物特征验证授权,待授权后自动进入系统。"
+            android:textColor="@color/common_white"
+            android:textSize="20dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintWidth_percent="0.85" />
+            app:layout_constraintTop_toBottomOf="@id/tv_tips_title" />
 
         <fragment
             android:id="@+id/fl_recognize_face"
@@ -33,11 +47,11 @@
             android:layout_height="0dp"
             android:layout_marginTop="40dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintDimensionRatio="1:0.9"
+            app:layout_constraintDimensionRatio="1:1.043"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintWidth_percent="0.3" />
+            app:layout_constraintWidth_percent="0.22" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

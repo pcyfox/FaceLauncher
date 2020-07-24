@@ -28,7 +28,7 @@ open class ObserverImpl<T> : Observer<T> {
 
     override fun onError(e: Throwable) {
         e.printStackTrace()
-        XLog.e("ObserverImpl onError():" + genName() + Util.getExceptionContent(e))
+        XLog.w("ObserverImpl onError():" + genName() + Util.getExceptionContent(e))
         liveData?.postValue(buildErrorData(e, clazz!!))
     }
 

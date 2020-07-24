@@ -8,31 +8,30 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/arc_dialog_bg"
-        android:paddingStart="30dp"
-        android:paddingTop="30dp"
-        android:paddingEnd="30dp"
-        android:paddingBottom="30dp">
+        android:background="@drawable/arc_bg_rect">
 
-        <TextView
-            android:id="@+id/tv_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:textColor="#1A94FD"
+        <ImageView
+            android:id="@+id/iv_inner_bg"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintHeight_percent="0.9"
+            app:layout_constraintWidth_percent="0.9"
+            android:background="@color/common_white"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
 
         <TextureView
             android:id="@+id/single_camera_texture_preview"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="0dp"
-            app:layout_constraintBottom_toTopOf="@+id/tv_tip"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHeight_percent="0.8"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_margin="12dp"
+            app:layout_constraintEnd_toEndOf="@+id/iv_inner_bg"
+            app:layout_constraintHeight_percent="0.75"
+            app:layout_constraintStart_toStartOf="@id/iv_inner_bg"
+            app:layout_constraintTop_toTopOf="@+id/iv_inner_bg" />
 
 
         <com.taike.module_arcface.arcface.draw.FaceRectView
@@ -50,11 +49,9 @@
             android:layout_height="0dp"
             android:background="@mipmap/img42"
             app:layout_constraintBottom_toBottomOf="@+id/single_camera_texture_preview"
-            app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintEnd_toEndOf="@+id/single_camera_texture_preview"
             app:layout_constraintStart_toStartOf="@+id/single_camera_texture_preview"
-            app:layout_constraintTop_toTopOf="@+id/single_camera_texture_preview"
-            app:layout_constraintWidth_percent="0.52" />
+            app:layout_constraintTop_toTopOf="@+id/single_camera_texture_preview" />
 
 
         <ImageView
@@ -72,12 +69,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="6dp"
-            android:paddingTop="20dp"
             android:text="人脸识别中..."
             android:textColor="#1A94FD"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:textSize="20dp"
+            app:layout_constraintBottom_toBottomOf="@id/iv_inner_bg"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/single_camera_texture_preview" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

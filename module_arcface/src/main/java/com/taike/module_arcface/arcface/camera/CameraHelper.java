@@ -103,9 +103,7 @@ public class CameraHelper implements Camera.PreviewCallback {
                 return;
             }
             //XLog.d("mCameraId   " + mCameraId);
-            if (mCamera == null) {
-                mCamera = Camera.open(mCameraId);
-            }
+            mCamera = Camera.open(mCameraId);
 
             displayOrientation = getCameraOri(rotation);
             mCamera.setDisplayOrientation(displayOrientation);
