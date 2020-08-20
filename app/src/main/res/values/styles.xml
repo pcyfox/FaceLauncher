@@ -18,8 +18,7 @@
     </style>
 
     <style name="SplashActivityTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:windowBackground">@null</item>
-        <item name="android:windowDisablePreview">true</item>
+        <item name="android:windowBackground">@color/common_transparent</item>
     </style>
 
 </resources>

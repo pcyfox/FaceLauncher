@@ -1,5 +1,7 @@
 package com.taike.lib_network.udp;
 
+import android.util.Log;
+
 import com.elvishew.xlog.XLog;
 
 import java.io.IOException;
@@ -28,7 +30,7 @@ public class UDPSocketClient {
     private static final String BROADCAST_IP = "255.255.255.255";
 
     // 端口号，
-    public static int CLIENT_PORT = 2068;
+    public static int CLIENT_PORT = 2008;
     public static int SERVER_PORT = 1099;
     public static String SERVER_IP = "";
 
@@ -194,6 +196,7 @@ public class UDPSocketClient {
         if (client == null) {
             return;
         }
+        Log.d(TAG, "sendBroadcast() called with: message = [" + message + "]");
         mThreadPool.execute(new Runnable() {
             @Override
             public void run() {
@@ -238,6 +241,4 @@ public class UDPSocketClient {
     public interface MsgArrivedListener {
         void onMsgArrived(String msg);
     }
-
-
 }

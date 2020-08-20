@@ -1,2 +1,2 @@
-rootProject.name='FaceLauncher'
-include ':app',   ':lib_log', ':lib_third', ':module_arcface', ':lib_network', ':lib_utils', ':lib_common'
+rootProject.name = 'TKLauncher'
+include ':app', ':lib_log', ':lib_third', ':lib_network', ':lib_utils', ':lib_common'
