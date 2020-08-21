@@ -4,6 +4,7 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 def projectName = "TK-Launcher"
 def rootDependencies = rootProject.ext.dependencies
+def APP_TYPE = 0
 android {
     compileSdkVersion project.compileSdkVersion
     defaultConfig {
@@ -12,7 +13,7 @@ android {
         targetSdkVersion project.androidTargetSdk
         versionCode 1
         versionName "1.01"
-
+        buildConfigField("Integer", "APP_TYPE", APP_TYPE.toInteger().toString())
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
