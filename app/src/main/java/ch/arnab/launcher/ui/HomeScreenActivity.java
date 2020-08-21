@@ -1,9 +1,14 @@
 package ch.arnab.launcher.ui;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
@@ -40,6 +45,7 @@ public class HomeScreenActivity extends FragmentActivity {
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         PermissionUtils.permission(PermissionConstants.STORAGE);
+        handleUSBDisk();
         Log.d(TAG, "onPostCreate() called with: isAppRoot = [" + AppUtils.isAppRoot() + "]");
         SocketMsgHandler.getInstance().init(this, new SocketMsgHandler.AppModelGetter() {
             @Override
@@ -55,6 +61,29 @@ public class HomeScreenActivity extends FragmentActivity {
                 }
             }, 1);
         }
+    }
+
+    private void handleUSBDisk() {
+        BroadcastReceiver mSdcardReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().equals(Intent.ACTION_MEDIA_MOUNTED)) {
+                    Toast.makeText(context, "path:" + intent.getData().getPath(), Toast.LENGTH_SHORT).show();
+                    Intent openIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                    openIntent.setType("*/*");//设置类型，我这里是任意类型，任意后缀的可以这样写。
+                    openIntent.addCategory(Intent.CATEGORY_OPENABLE);
+                    startActivityForResult(openIntent, 1);
+                } else if (intent.getAction().equals(Intent.ACTION_MEDIA_REMOVED)) {
+                    Log.i("123", "remove ACTION_MEDIA_REMOVED");
+                }
+            }
+        };
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_MEDIA_MOUNTED);   //接受外媒挂载过滤器
+        filter.addAction(Intent.ACTION_MEDIA_REMOVED);   //接受外媒挂载过滤器
+        filter.addDataScheme("file");
+        registerReceiver(mSdcardReceiver, filter, "android.permission.READ_EXTERNAL_STORAGE", null);
+
     }
 
     @Override
