@@ -3,6 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 def projectName = "TK-Launcher"
+def rootDependencies = rootProject.ext.dependencies
 android {
     compileSdkVersion project.compileSdkVersion
     defaultConfig {

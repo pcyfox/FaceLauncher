@@ -2,7 +2,6 @@ package ch.arnab.launcher.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-
 import android.view.View;
 import android.widget.GridView;
 
@@ -10,6 +9,7 @@ import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import ch.arnab.launcher.AppListAdapter;
 import ch.arnab.launcher.AppModel;
@@ -24,6 +24,8 @@ public class AppsGridFragment extends GridFragment implements LoaderManager.Load
 
     private AppModelFilter appModelFilter;
     AppListAdapter mAdapter;
+    private List<AppModel> allApps;
+    private List<AppModel> loadedApps;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -45,7 +47,9 @@ public class AppsGridFragment extends GridFragment implements LoaderManager.Load
 
     @Override
     public void onLoadFinished(Loader<ArrayList<AppModel>> loader, ArrayList<AppModel> apps) {
-        mAdapter.setData(appModelFilter.filer(apps));
+        allApps = apps;
+        loadedApps = appModelFilter.filer(apps);
+        mAdapter.setData(loadedApps);
         if (isResumed()) {
             setGridShown(true);
         } else {
@@ -67,5 +71,14 @@ public class AppsGridFragment extends GridFragment implements LoaderManager.Load
                 startActivity(intent);
             }
         }
+    }
+
+    public List<AppModel> getAllApps() {
+        return allApps;
+    }
+
+
+    public List<AppModel> getLoadedApps() {
+        return loadedApps;
     }
 }

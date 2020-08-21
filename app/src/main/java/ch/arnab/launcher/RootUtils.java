@@ -10,6 +10,13 @@ public class RootUtils {
     private static final String TAG = "RootUtils";
 
     /**
+     * 为app申请root权限
+     */
+    public static ShellUtils.CommandResult grantRoot(Context context) {
+        return ShellUtils.execCmd("chmod 777 " + context.getPackageCodePath(), true);
+    }
+
+    /**
      * 安装apk
      */
     public static void installAPK(Context context, String apkPath) {
@@ -20,16 +27,18 @@ public class RootUtils {
         execCmdAsync("pm uninstall " + packName);
     }
 
-    public static void cleatApp(String packName) {
+    public static void clearApp(String packName) {
         execCmdAsync("pm clear " + packName);
     }
 
 
     public static void killApp(String pkgName) {
+        Log.d(TAG, "killApp() called with: pkgName = [" + pkgName + "]");
         execCmdAsync("am force-stop  " + pkgName);
     }
 
     public static void startApp(String pkgName) {
+        Log.d(TAG, "startApp() called with: pkgName = [" + pkgName + "]");
         execCmdAsync("am start " + pkgName);
     }
 

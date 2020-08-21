@@ -23,7 +23,7 @@ public class UDPSocketClient {
     private static UDPSocketClient instance;
     private static final String TAG = "UDPSocket";
     // 单个CPU线程池大小
-    private static final int POOL_SIZE = 5;
+    private static final int POOL_SIZE = 2;
     private static final int BUFFER_LENGTH = 8 * 1024;
     private byte[] receiveByte = new byte[BUFFER_LENGTH];
 
@@ -104,7 +104,7 @@ public class UDPSocketClient {
         clientThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                XLog.d("clientThread is running...");
+                XLog.d(TAG + ";clientThread is running...");
                 receiveMessage();
             }
         });
@@ -208,7 +208,7 @@ public class UDPSocketClient {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                  //  XLog.d("sendBroadcast() called with: message = [" + message + "]");
+                    //  XLog.d("sendBroadcast() called with: message = [" + message + "]");
                 } catch (UnknownHostException e) {
                     e.printStackTrace();
                 }

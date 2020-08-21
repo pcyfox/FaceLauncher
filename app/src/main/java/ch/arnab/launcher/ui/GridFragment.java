@@ -19,7 +19,6 @@ package ch.arnab.launcher.ui;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.TypedValue;

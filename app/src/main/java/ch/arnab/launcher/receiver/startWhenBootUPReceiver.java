@@ -9,17 +9,15 @@ import com.blankj.utilcode.util.SPStaticUtils;
 
 
 public class startWhenBootUPReceiver extends BroadcastReceiver {
-
     private final String activeName = "android.intent.action.BOOT_COMPLETED";
     private static final String ACTION_SHUTDOWN = "android.intent.action.ACTION_SHUTDOWN";
 
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d("startWhenBootup", "开机自动服务自动启动...");
-        if (intent.getAction().equals(activeName))
-        {
+        if (intent.getAction().equals(activeName)) {
 
-        }else {
+        } else {
             SPStaticUtils.clear();
         }
 

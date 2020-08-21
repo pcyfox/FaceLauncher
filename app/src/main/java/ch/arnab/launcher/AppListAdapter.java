@@ -10,13 +10,12 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-
 import com.tk.launcher.R;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by Arnab Chakraborty
@@ -24,13 +23,13 @@ import java.util.Collection;
 public class AppListAdapter extends ArrayAdapter<AppModel> {
     private final LayoutInflater mInflater;
 
-    public AppListAdapter (Context context) {
+    public AppListAdapter(Context context) {
         super(context, android.R.layout.simple_list_item_2);
 
         mInflater = LayoutInflater.from(context);
     }
 
-    public void setData(ArrayList<AppModel> data) {
+    public void setData(List<AppModel> data) {
         clear();
         if (data != null) {
             addAll(data);
@@ -47,7 +46,8 @@ public class AppListAdapter extends ArrayAdapter<AppModel> {
     /**
      * Populate new items in the list.
      */
-    @Override public View getView(int position, View convertView, ViewGroup parent) {
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
         View view;
 
         if (convertView == null) {
@@ -57,8 +57,8 @@ public class AppListAdapter extends ArrayAdapter<AppModel> {
         }
 
         AppModel item = getItem(position);
-        ((ImageView)view.findViewById(R.id.icon)).setImageDrawable(item.getIcon());
-        ((TextView)view.findViewById(R.id.text)).setText(item.getLabel());
+        ((ImageView) view.findViewById(R.id.icon)).setImageDrawable(item.getIcon());
+        ((TextView) view.findViewById(R.id.text)).setText(item.getLabel());
 
         return view;
     }
