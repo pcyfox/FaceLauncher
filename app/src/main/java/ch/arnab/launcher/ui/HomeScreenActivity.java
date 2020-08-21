@@ -83,7 +83,6 @@ public class HomeScreenActivity extends FragmentActivity {
         filter.addAction(Intent.ACTION_MEDIA_REMOVED);   //接受外媒挂载过滤器
         filter.addDataScheme("file");
         registerReceiver(mSdcardReceiver, filter, "android.permission.READ_EXTERNAL_STORAGE", null);
-
     }
 
     @Override
@@ -109,7 +108,7 @@ public class HomeScreenActivity extends FragmentActivity {
     public void onTest(View view) {
         //{"action":"CLOSE_APP","data":"com.taike.edu.stu"}
         //UDPSocketClient.getInstance().sendBroadcast(GsonUtils.toJson(new LauncherMessage(Action.LAUNCH_APP_SINGLE_TOP, "com.taike.edu.stu")));
-        UDPSocketClient.getInstance().sendBroadcast(GsonUtils.toJson(new LauncherMessage(Action.INSTALL_APP, "http://192.168.28.11:8080/edu_stu.apk")));
+      //  UDPSocketClient.getInstance().sendBroadcast(GsonUtils.toJson(new LauncherMessage(Action.INSTALL_APP, "http://192.168.28.11:8080/edu_stu.apk")));
         //RootUtils.cleatApp("com.taike.edu.stu");
         //RootUtils.uninstallAPK("com.taike.edu.stu");
         // RootUtils.installAPK(this, "/sdcard/debug_TK-Stu_V1.0.0_1_2020-08-20_19-47-52.apk");
