@@ -16,9 +16,7 @@ import androidx.fragment.app.FragmentActivity;
 import com.blankj.utilcode.constant.PermissionConstants;
 import com.blankj.utilcode.util.ActivityUtils;
 import com.blankj.utilcode.util.AppUtils;
-import com.blankj.utilcode.util.GsonUtils;
 import com.blankj.utilcode.util.PermissionUtils;
-import com.taike.lib_network.udp.UDPSocketClient;
 import com.tk.launcher.BuildConfig;
 import com.tk.launcher.R;
 
@@ -27,8 +25,6 @@ import java.util.List;
 import ch.arnab.launcher.App;
 import ch.arnab.launcher.AppModel;
 import ch.arnab.launcher.SocketMsgHandler;
-import ch.arnab.launcher.entity.Action;
-import ch.arnab.launcher.entity.LauncherMessage;
 
 public class HomeScreenActivity extends FragmentActivity {
     private static final String TAG = "HomeScreenActivity";

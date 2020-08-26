@@ -9,6 +9,7 @@ import android.util.Log;
 
 import com.blankj.utilcode.util.AppUtils;
 import com.blankj.utilcode.util.GsonUtils;
+import com.blankj.utilcode.util.ToastUtils;
 import com.taike.lib_network.download.DownLoadCallback;
 import com.taike.lib_network.download.DownloadManager;
 import com.taike.lib_network.udp.UDPSocketClient;
@@ -67,6 +68,7 @@ public class SocketMsgHandler {
                     if (launcherMessage == null) {
                         return;
                     }
+                    ToastUtils.showShort(msg);
                     String data = launcherMessage.getData();
                     switch (launcherMessage.getAction()) {
                         case EXEC_CMD:
@@ -132,6 +134,7 @@ public class SocketMsgHandler {
             public void onFinish(String file) {
                 Log.d(TAG, "onFinish() called with: file = [" + file + "]");
                 if (installApk && file.toLowerCase().endsWith("apk")) {
+                    ToastUtils.showShort("APK下载成功,开始安装");
                     RootUtils.installAPK(context, file);
                 }
                 super.onFinish(file);
@@ -139,7 +142,8 @@ public class SocketMsgHandler {
 
             @Override
             public void onError(String msg) {
-                Log.e(TAG, "onError: "+msg);
+                ToastUtils.showLong("下载失败:" + msg);
+                Log.e(TAG, "onError: " + msg);
                 super.onError(msg);
             }
         });

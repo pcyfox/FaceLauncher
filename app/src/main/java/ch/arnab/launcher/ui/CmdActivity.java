@@ -1,10 +1,7 @@
 package ch.arnab.launcher.ui;
 
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Menu;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -14,17 +11,11 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import com.blankj.utilcode.constant.PermissionConstants;
-import com.blankj.utilcode.util.AppUtils;
 import com.blankj.utilcode.util.GsonUtils;
 import com.blankj.utilcode.util.PermissionUtils;
 import com.taike.lib_network.udp.UDPSocketClient;
 import com.tk.launcher.R;
 
-import java.util.List;
-
-import ch.arnab.launcher.App;
-import ch.arnab.launcher.AppModel;
-import ch.arnab.launcher.SocketMsgHandler;
 import ch.arnab.launcher.entity.Action;
 import ch.arnab.launcher.entity.LauncherMessage;
 
@@ -47,8 +38,6 @@ public class CmdActivity extends FragmentActivity {
         editTextCmd.setText("{\"action\":\"CLOSE_APP\",\"data\":\"com.taike.edu.stu\"}");
 
         LinearLayout linearLayout = findViewById(R.id.ll_cmd);
-
-
         for (final Action action : Action.values()) {
             RadioButton button = new RadioButton(this);
             button.setTextColor(ContextCompat.getColor(this, R.color.common_colorAccent));
@@ -61,8 +50,6 @@ public class CmdActivity extends FragmentActivity {
                 }
             });
         }
-
-
     }
 
 
