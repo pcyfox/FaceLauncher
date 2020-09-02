@@ -32,7 +32,7 @@ public class UDPSocketClient {
     private static final String BROADCAST_IP = "255.255.255.255";
 
     // 端口号，
-    private int CLIENT_PORT = 2168;
+    private int CLIENT_PORT = 1999;
     public int SERVER_PORT = 1099;
     public static String SERVER_IP = "";
 
@@ -82,15 +82,15 @@ public class UDPSocketClient {
         try {
             // 表明这个 Socket 在设置的端口上监听数据。
             client = new DatagramSocket(CLIENT_PORT);
-            XLog.d(" client = new DatagramSocket(CLIENT_PORT)" + client);
+            XLog.i(TAG + ":startUDPSocket() called client port =" + CLIENT_PORT);
             if (receivePacket == null) {
                 // 创建接受数据的 packet
                 receivePacket = new DatagramPacket(receiveByte, BUFFER_LENGTH);
             }
             startSocketThread();
-            XLog.d("startUDPSocket() called");
             isStarted = true;
         } catch (SocketException e) {
+            XLog.i(TAG + ":startUDPSocket() error =" + e.getMessage());
             e.printStackTrace();
         }
     }

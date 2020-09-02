@@ -3,8 +3,6 @@ apply plugin: 'kotlin-android'
 
 def rootDependencies = rootProject.ext.dependencies
 
-
-
 android {
     compileSdkVersion project.compileSdkVersion
     defaultConfig {

@@ -20,6 +20,7 @@ import com.blankj.utilcode.util.ActivityUtils;
 import com.blankj.utilcode.util.AppUtils;
 import com.blankj.utilcode.util.PermissionUtils;
 import com.blankj.utilcode.util.SPStaticUtils;
+import com.elvishew.xlog.XLog;
 import com.taike.lib_utils.IPutils;
 import com.tk.launcher.BuildConfig;
 import com.tk.launcher.R;
@@ -44,7 +45,7 @@ public class HomeScreenActivity extends FragmentActivity {
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         handleUSBDisk();
-        Log.d(TAG, "onPostCreate() called with: isAppRoot = [" + AppUtils.isAppRoot() + "]");
+        XLog.d(TAG + ":onPostCreate() called with: isAppRoot = [" + AppUtils.isAppRoot() + "]");
         SPStaticUtils.put("IP", IPutils.getIpAdress(this));
         SocketMsgHandler.getInstance().init(this, () -> fragment.getAllApps());
     }
@@ -59,6 +60,7 @@ public class HomeScreenActivity extends FragmentActivity {
                 SocketMsgHandler.getInstance().reconnect();
             }
         }
+
         if (BuildConfig.APP_TYPE == 1) {
             getWindow().getDecorView().postDelayed(new Runnable() {
                 @Override

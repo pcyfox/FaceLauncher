@@ -5,8 +5,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.GridView;
 
-import androidx.annotation.NonNull;
-import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
@@ -49,7 +47,7 @@ public class AppsGridFragment extends GridFragment implements LoaderManager.Load
         LiveEventBus.get().with(Action.SHOW_ALL_APPS.name(), String.class).observe(this, new Observer<String>() {
             @Override
             public void onChanged(String s) {
-                isShowAllApp = "true".equals(s);
+                isShowAllApp = "true".equals(s) || "1".equals(s);
                 if (allApps != null && mAdapter != null) {
                     if (isShowAllApp) {
                         mAdapter.setData(allApps);

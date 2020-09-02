@@ -23,10 +23,10 @@ public class HeaderInterceptor implements Interceptor {
         Request.Builder builder = chain.request().newBuilder();
         String encodedPath = chain.request().url().toString();
         if (filter != null && filter.filter(encodedPath)) {
-           // Log.d(TAG, "intercept() called with: filter = [" + true + "]");
+            // Log.d(TAG, "intercept() called with: filter = [" + true + "]");
             return chain.proceed(builder.build());
         }
-      //  Log.d(TAG, "intercept() called with: mHeadMap = [" + mHeadMap + "]");
+        //  Log.d(TAG, "intercept() called with: mHeadMap = [" + mHeadMap + "]");
         for (String key : mHeadMap.keySet()) {
             String value = mHeadMap.get(key);
             if (value != null) {
@@ -50,7 +50,11 @@ public class HeaderInterceptor implements Interceptor {
         mHeadMap.put("app-version-code", code);
     }
 
-    public void setUid(String uid ) {
+    public void setAppVersionName(String name) {
+        mHeadMap.put("app-version-name", name);
+    }
+
+    public void setUid(String uid) {
         mHeadMap.put("uid", uid);
     }
 

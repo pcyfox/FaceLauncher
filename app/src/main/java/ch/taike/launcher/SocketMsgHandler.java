@@ -10,11 +10,11 @@ import android.util.Log;
 import com.blankj.utilcode.util.AppUtils;
 import com.blankj.utilcode.util.GsonUtils;
 import com.blankj.utilcode.util.ToastUtils;
+import com.elvishew.xlog.XLog;
 import com.jeremyliao.liveeventbus.LiveEventBus;
 import com.taike.lib_network.download.DownLoadCallback;
 import com.taike.lib_network.download.DownloadManager;
 import com.taike.lib_network.udp.UDPSocketClient;
-import com.taike.lib_utils.ToastUtil;
 import com.tk.launcher.BuildConfig;
 
 import java.io.File;
@@ -46,12 +46,9 @@ public class SocketMsgHandler {
         this.appModelGetter = appModelGetter;
         this.context = context;
         initWorker();
-        worker.post(new Runnable() {
-            @Override
-            public void run() {
-                RootUtils.grantRoot(context.getApplicationContext());
-                initUDP();
-            }
+        worker.post(() -> {
+            RootUtils.grantRoot(context.getApplicationContext());
+            initUDP();
         });
     }
 
@@ -63,7 +60,7 @@ public class SocketMsgHandler {
     }
 
     private void handleMsg(final String msg) {
-        Log.d(TAG, "onMsgArrived() called with: msg = [" + msg + "]");
+        XLog.i(TAG + ":onMsgArrived() called with: msg = [" + msg + "]");
         worker.post(new Runnable() {
             @Override
             public void run() {
@@ -160,12 +157,12 @@ public class SocketMsgHandler {
 
             @Override
             public void onFinish(String file) {
-                Log.d(TAG, "onFinish() called with: file = [" + file + "]");
+                XLog.i(TAG + ";onFinish() called with: file = [" + file + "]");
                 if (installApk && file.toLowerCase().endsWith("apk")) {
                     ToastUtils.showLong("APK下载成功,开始安装");
                     RootUtils.installAPK(context, file);
                 } else {
-                    ToastUtils.showShort("下载完成！file:"+file);
+                    ToastUtils.showShort("下载完成！file:" + file);
                 }
                 super.onFinish(file);
             }
@@ -183,20 +180,21 @@ public class SocketMsgHandler {
         if (BuildConfig.APP_TYPE == 0) {
             UDPSocketClient.getInstance().setMsgArrivedListener(this::handleMsg);
         }
+        UDPSocketClient.getInstance().setClientPort(BuildConfig.UDP_CLIENT_PORT);
         UDPSocketClient.getInstance().startUDPSocket();
     }
 
     public void reconnect() {
-        Log.d(TAG, "reconnect() called");
+        XLog.i(TAG, "reconnect() called");
         UDPSocketClient.getInstance().setOnStateChangeLister(new UDPSocketClient.OnStateChangeLister() {
             @Override
             public void onStart() {
-                Log.d(TAG, "onStart() called");
+                XLog.i(TAG + ":reconnect() onStart() called");
             }
 
             @Override
             public void onStop() {
-                Log.d(TAG, "onStop() called");
+                XLog.i(TAG + ":onStop() called");
                 UDPSocketClient.getInstance().startUDPSocket();
             }
         });

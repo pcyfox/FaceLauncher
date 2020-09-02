@@ -47,8 +47,10 @@ public abstract class AbsRequest {
 
     void buildHttpClient() {
         OkHttpClient.Builder builder = createOkHttpClientBuilder();
-        for (Interceptor interceptor : interceptors) {
-            builder.addInterceptor(interceptor);
+        if (interceptors != null) {
+            for (Interceptor interceptor : interceptors) {
+                builder.addInterceptor(interceptor);
+            }
         }
         httpClient = builder.build();
     }

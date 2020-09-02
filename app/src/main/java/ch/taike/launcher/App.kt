@@ -8,7 +8,6 @@ import com.blankj.utilcode.util.PermissionUtils
 import com.taike.lib_common.BuildConfig
 
 class App : Application() {
-
     override fun onCreate() {
         super.onCreate()
         MultiDex.install(this)
@@ -20,8 +19,8 @@ class App : Application() {
     }
 
     private fun initLog() {
-        val ELKPort = 8090
-        TrdServiceManager.initLog("TK-LAUNCHER", BuildConfig.ELK_URL + ":" + ELKPort)
+        val ELKPort = 8087
+        TrdServiceManager.initLog("TK-LAUNCHER-LOG", BuildConfig.ELK_URL + ":" + ELKPort)
         TrdServiceManager.initLiveEventBus()
         if (PermissionUtils.isGranted(PermissionConstants.STORAGE)) {
             Thread {

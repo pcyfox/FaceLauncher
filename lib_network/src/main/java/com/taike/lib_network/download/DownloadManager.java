@@ -168,8 +168,8 @@ public class DownloadManager {
     }
 
 
-    public void downloadToDir(String dUrl, String storeDir, String cacheKey, boolean isUseCache, DownLoadCallback downloadUrlCallback) {
-        download(dUrl, cacheKey, null, null, storeDir, null, isUseCache, downloadUrlCallback);
+    public void downloadToDir(String dUrl, String subStorePath, String cacheKey, boolean isUseCache, DownLoadCallback downloadUrlCallback) {
+        download(dUrl, cacheKey, null, null, subStorePath, null, isUseCache, downloadUrlCallback);
     }
 
     public void downloadToDir(String dUrl, String storeDir, boolean isUseCache, DownLoadCallback downloadUrlCallback) {
@@ -289,7 +289,7 @@ public class DownloadManager {
         String key = TextUtils.isEmpty(cacheKey) ? url + jsonParam : cacheKey;
         String rootPath = defStoreDir;
         if (!TextUtils.isEmpty(storePath) && new File(storePath).isDirectory()) {
-            rootPath = storePath;
+            rootPath = defStoreDir;
         }
         DownloadInfo downloadInfo = new DownloadInfo(url);
         downloadInfo.setStoreDir(rootPath);
@@ -310,11 +310,6 @@ public class DownloadManager {
     }
 
     private String getFileNameFormUrl(String url) {
-        int pointIndex = url.lastIndexOf(".");
-        if (url.length() - pointIndex >= 3 && url.length() - pointIndex <= 5) {
-            return url.substring(pointIndex - 5);
-        }
-
         int index = url.indexOf("?");
         if (index > 0) {
             String sub = url.substring(0, index);

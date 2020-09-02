@@ -158,15 +158,12 @@ public class CloudLogPrinter implements Printer {
                 handleUpdate(createLog(tag, msg), cacheKey);
                 return;
             }
-            if (!isUpdating) {
-                return;
-            }
-            if (mLogs.size() < quantityInterval) {
+            if (mLogs.size() < quantityInterval || isUpdating) {
                 addLog(tag, msg);
                 return;
             }
 
-            Log.d(TAG, "upload log:-----------------> 日志已满，开始打包上传  size:" + mLogs.size());
+            Log.i(TAG, "upload log:-----------------> 日志已满，开始打包上传  size:" + mLogs.size());
             try {
                 final StringBuilder reqContent = new StringBuilder();
                 for (int i = 0; i < mLogs.size(); i++) {

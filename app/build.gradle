@@ -4,7 +4,8 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 def projectName = "TK-Launcher"
 def rootDependencies = rootProject.ext.dependencies
-def APP_TYPE = 0//0：桌面 1：桌面调试工具
+def APP_TYPE = 0//0：桌面  1：桌面调试工具
+def UDPClientPort = 1198
 android {
     compileSdkVersion project.compileSdkVersion
     defaultConfig {
@@ -15,6 +16,7 @@ android {
         versionName "V1.01"
 
         buildConfigField("Integer", "APP_TYPE", APP_TYPE.toInteger().toString())
+        buildConfigField("Integer", "UDP_CLIENT_PORT", UDPClientPort.toInteger().toString())
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         if (APP_TYPE.toInteger() == 1) {
