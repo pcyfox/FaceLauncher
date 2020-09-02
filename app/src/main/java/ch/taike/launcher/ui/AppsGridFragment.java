@@ -94,7 +94,7 @@ public class AppsGridFragment extends GridFragment implements LoaderManager.Load
         if (app != null) {
             Intent intent = getActivity().getPackageManager().getLaunchIntentForPackage(app.getApplicationPackageName());
             if (intent != null) {
-                XLog.i(TAG + ":onGridItemClick() called with: g = [" + g + "], v = [" + v + "], position = [" + position + "], id = [" + id + "]");
+                XLog.i(TAG + ":user startActivity called with: app = [" + app + "]");
                 startActivity(intent);
             }
         }

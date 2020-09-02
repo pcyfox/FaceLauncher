@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.graphics.drawable.Drawable;
 
+import com.blankj.utilcode.util.AppUtils;
+
 import java.io.File;
 
 /**
@@ -74,5 +76,17 @@ public class AppModel {
                 mAppLabel = label != null ? label.toString() : mInfo.packageName;
             }
         }
+    }
+
+    @Override
+    public String toString() {
+
+        return "ApplicationInfo{" +
+                "packageName=" + mInfo.packageName +
+                ", permission=" + mInfo.permission +
+                ", appVersionCode=" + AppUtils.getAppVersionCode(mInfo.packageName) +
+                ", appVersionName=" + AppUtils.getAppVersionName(mInfo.packageName) +
+                ", mApkFile=" + mApkFile +
+                '}';
     }
 }

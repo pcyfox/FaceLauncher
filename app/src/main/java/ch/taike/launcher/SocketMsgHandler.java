@@ -140,7 +140,7 @@ public class SocketMsgHandler {
             }
         }
 
-        DownloadManager.getInstance().downloadToDir(url, storePath, false, new DownLoadCallback() {
+        DownloadManager.getInstance().downloadToDir(url, storePath, true, new DownLoadCallback() {
             @Override
             public void onStart() {
                 ToastUtils.showShort("start download!");
@@ -154,6 +154,7 @@ public class SocketMsgHandler {
 
             @Override
             public void onProgress(float progress, long totalSize) {
+                Log.d(TAG, "onProgress() called with: progress = [" + progress + "], totalSize = [" + totalSize + "]");
                 super.onProgress(progress, totalSize);
             }
 

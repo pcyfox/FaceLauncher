@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.blankj.utilcode.util.ShellUtils;
 import com.blankj.utilcode.util.Utils;
+import com.elvishew.xlog.XLog;
 
 public class RootUtils {
     private static final String TAG = "RootUtils";
@@ -47,7 +48,7 @@ public class RootUtils {
         ShellUtils.execCmdAsync(cmd, true, new Utils.Callback<ShellUtils.CommandResult>() {
             @Override
             public void onCall(ShellUtils.CommandResult data) {
-                Log.d(TAG, "onCall() called with: data = [" + data + "]");
+                XLog.i(TAG + ":adb execCmdAsync called with:cmd=" + cmd + ",result= [" + data + "]");
             }
         });
     }

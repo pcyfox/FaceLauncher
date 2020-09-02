@@ -9,6 +9,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -35,6 +36,8 @@ public class HomeScreenActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.homescreen);
         fragment = (AppsGridFragment) getSupportFragmentManager().findFragmentById(R.id.apps_grid);
+        TextView versionName = findViewById(R.id.tv_version);
+        versionName.setText(AppUtils.getAppVersionName());
     }
 
     @Override
