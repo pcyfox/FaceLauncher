@@ -4,7 +4,7 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 def projectName = "TK-Launcher"
 def rootDependencies = rootProject.ext.dependencies
-def APP_TYPE = 0
+def APP_TYPE = 0//0：桌面 1：桌面调试工具
 android {
     compileSdkVersion project.compileSdkVersion
     defaultConfig {
@@ -13,9 +13,13 @@ android {
         targetSdkVersion project.androidTargetSdk
         versionCode 1
         versionName "1.01"
+
         buildConfigField("Integer", "APP_TYPE", APP_TYPE.toInteger().toString())
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
+        if (APP_TYPE.toInteger() == 1) {
+            projectName = "TK-Launcher-Controlor"
+        }
         ndk {
             abiFilters 'armeabi', 'armeabi-v7a'
         }
@@ -53,15 +57,20 @@ android {
     dataBinding {
         enabled true
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
     implementation project(path: ':lib_network')
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    implementation project(path: ':lib_log')
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     implementation 'com.android.support:multidex-instrumentation:1.0.3'

@@ -2,34 +2,52 @@ package com.taike.lib_common.config;
 
 import android.text.TextUtils;
 
-import com.taike.lib_common.BuildConfig;
+import com.taike.lib_common.manager.PathManager;
 
 public final class AppConfig {
     private AppConfig() {
     }
 
     private static String baseUrl;
+    public static final String NET_CAMERA_ACCOUNT = "admin";
+    public static final String NET_CAMERA_PSD = "123456";
+    public static final int NET_CAMERA_PORT = 8091;
+    public static final String KEY_BASE_URL = "KEY_BASE_URL";
 
-    public static String getBaseUrl() {
-        if (!TextUtils.isEmpty(baseUrl)) {
-            return baseUrl;
+
+    public static String getNetCameraRTSPSubUrl(String host) {
+        if (TextUtils.isEmpty(host)) {
+            return "";
         }
-        if (BuildConfig.DEBUG) return BuildConfig.DEBUG_URL;
-        return BuildConfig.BASE_URL;
+        return "rtsp://" + NET_CAMERA_ACCOUNT + ":" + NET_CAMERA_PSD + "@" + host + "/mpeg4cif";
     }
 
-    public static void setBaseUrl(String baseUrl) {
-        AppConfig.baseUrl = baseUrl;
+    public static String getNetCameraRTSPMainUrl(String host) {
+        if (TextUtils.isEmpty(host)) {
+            return "";
+        }
+        return "rtsp://" + NET_CAMERA_ACCOUNT + ":" + NET_CAMERA_PSD + "@" + host + "/mpeg4";
     }
 
-
-    public static String getDownloadBaseUrl() {
-        return getBaseUrl() + "video-service/file/appDownFile";
+    /**
+     * 下载文件统一存放地
+     *
+     * @return
+     */
+    public static String getDownloadStorePath() {
+        return PathManager.get().getDownloadPath();
     }
 
-    //http://192.168.8.95/video-service/file/appDownFile?url=jpg/5efbd4bb95234eb6ada9193b1918f4c3/timg%20(1).jpg
-    public static String getDownloadUrl(String path) {
-        return getDownloadBaseUrl() + "?url=" + path;
+    public static String getCachePath() {
+        return PathManager.get().getCachePath();
+    }
+
+    public static String getDataRootPath() {
+        return PathManager.get().getDataRootPath();
+    }
+
+    public static String getLogPath() {
+        return PathManager.get().getLogPath();
     }
 
 }

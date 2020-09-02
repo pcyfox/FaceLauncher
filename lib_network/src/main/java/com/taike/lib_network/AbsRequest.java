@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import okhttp3.Callback;
 import okhttp3.Interceptor;
@@ -20,39 +21,46 @@ import retrofit2.Retrofit;
  * date : 2019-10-25 11:10
  */
 public abstract class AbsRequest {
+    static final Object lock = new Object();
     private Set<Converter.Factory> converterFactories;
     private Set<Interceptor> interceptors;
-    String host;
+    String baseUrl;
     private OkHttpClient httpClient;
     private Retrofit retrofit;
-    boolean isRecordLog = true;//默认记录每一条请求记录
+    //标记关于URL的网络请求日志能否上传
+    protected volatile WeakHashMap<String, Boolean> uploadLogRequests = new WeakHashMap<>();
 
     abstract OkHttpClient.Builder createOkHttpClientBuilder();
 
     abstract Retrofit.Builder createRetrofitBuilder();
 
+
     AbsRequest() {
-        interceptors = new HashSet<>();
         converterFactories = new HashSet<>();
     }
 
-     OkHttpClient buildHttpClient() {
-        if (httpClient == null) {
-            OkHttpClient.Builder builder = createOkHttpClientBuilder();
-            for (Interceptor interceptor : interceptors) {
-                builder.addInterceptor(interceptor);
-            }
-            httpClient = builder.build();
+    public void addUpdateLogRequests(String url, Boolean isUpdate) {
+        synchronized (lock) {
+            uploadLogRequests.put(url, isUpdate);
         }
-        return httpClient;
     }
+
+    void buildHttpClient() {
+        OkHttpClient.Builder builder = createOkHttpClientBuilder();
+        for (Interceptor interceptor : interceptors) {
+            builder.addInterceptor(interceptor);
+        }
+        httpClient = builder.build();
+    }
+
 
     private Retrofit buildRetrofit() {
         Retrofit.Builder builder = createRetrofitBuilder();
         for (Converter.Factory factory : converterFactories) {
             builder.addConverterFactory(factory);
         }
-        builder.client(buildHttpClient());
+        buildHttpClient();
+        builder.client(httpClient);
         return builder.build();
     }
 
@@ -61,11 +69,13 @@ public abstract class AbsRequest {
         if (retrofit == null) {
             retrofit = buildRetrofit();
         }
-        isRecordLog = true;
         return retrofit.create(service);
     }
 
     public OkHttpClient getHttpClient() {
+        if (httpClient == null) {
+            buildHttpClient();
+        }
         return httpClient;
     }
 
@@ -77,8 +87,17 @@ public abstract class AbsRequest {
         return interceptors;
     }
 
+
+    public void cleaConverterFactories() {
+        converterFactories = new HashSet<>();
+    }
+
     public void addConverterFactory(Converter.Factory... factories) {
         converterFactories.addAll(Arrays.asList(factories));
+    }
+
+    public void cleatInterceptor() {
+        interceptors = new HashSet<>();
     }
 
     public void addInterceptor(Interceptor... interceptors) {
@@ -86,42 +105,41 @@ public abstract class AbsRequest {
     }
 
     public void asyncGet(@NonNull String url, Callback callback, boolean isRecordLog) {
-        this.isRecordLog = isRecordLog;
-
-        OKHttpUtils.get(buildHttpClient(), url, callback);
+        uploadLogRequests.put(url, isRecordLog);
+        OKHttpUtils.get(getHttpClient(), url, callback);
     }
 
     public void asyncGet(@NonNull String url, Callback callback) {
-        asyncGet(url, callback, isRecordLog);
+        asyncGet(url, callback, true);
     }
 
     public void asyncGet(@NonNull String url, Map<String, String> params, Map<String, String> header, boolean isRecordLog, Callback callback) {
-        this.isRecordLog = isRecordLog;
-        OKHttpUtils.get(buildHttpClient(), url, params, header, callback);
+        uploadLogRequests.put(url, isRecordLog);
+        OKHttpUtils.get(getHttpClient(), url, params, header, true, callback);
     }
 
     public void asyncGet(@NonNull String url, Map<String, String> params, Map<String, String> header, Callback callback) {
-        asyncGet(url, params, header, isRecordLog, callback);
+        asyncGet(url, params, header, true, callback);
     }
 
 
     public void asyncPost(@NonNull String url, Map<String, String> params, Map<String, String> header, boolean isRecordLog, Callback callback) {
-        this.isRecordLog = isRecordLog;
-        OKHttpUtils.post(buildHttpClient(), url, params, header, callback);
+        uploadLogRequests.put(url, isRecordLog);
+        OKHttpUtils.post(getHttpClient(), url, params, header, callback);
     }
 
     public void asyncPost(@NonNull String url, Map<String, String> params, Map<String, String> header, Callback callback) {
-        asyncPost(url, params, header, isRecordLog, callback);
+        asyncPost(url, params, header, true, callback);
     }
 
 
     public void asyncPost(@NonNull String url, String jsonContent, Map<String, String> header, boolean isRecordLog, Callback callback) {
-        this.isRecordLog = isRecordLog;
-        OKHttpUtils.post(buildHttpClient(), url, jsonContent, header, callback);
+        uploadLogRequests.put(url, isRecordLog);
+        OKHttpUtils.post(getHttpClient(), url, jsonContent, header, callback);
     }
 
     public void asyncPost(@NonNull String url, String jsonContent, Map<String, String> header, Callback callback) {
-        asyncPost(url, jsonContent, header, isRecordLog, callback);
+        asyncPost(url, jsonContent, header, true, callback);
     }
 
 }

@@ -6,6 +6,7 @@ import android.util.Log;
 import com.elvishew.xlog.LogConfiguration;
 import com.elvishew.xlog.LogLevel;
 import com.elvishew.xlog.XLog;
+import com.elvishew.xlog.internal.DefaultsFactory;
 import com.elvishew.xlog.printer.AndroidPrinter;
 import com.elvishew.xlog.printer.Printer;
 import com.elvishew.xlog.printer.file.FilePrinter;
@@ -22,7 +23,7 @@ public class XLogHelper {
      * @param mCloudLogPrinter 自定义打印前
      * @param LogDir           日志存储路径
      * @param tag              标签
-     * @param logRprFileName    日志文件名前缀
+     * @param logRprFileName   日志文件名前缀
      */
     public static void initLog(CloudLogPrinter mCloudLogPrinter, String LogDir, String tag, final String logRprFileName) {
         Log.d(TAG, "initLog() called with: mCloudLogPrinter = [" + mCloudLogPrinter + "], LogDir = [" + LogDir + "], tag = [" + tag + "], prFileName = [" + logRprFileName + "]");
@@ -44,8 +45,7 @@ public class XLogHelper {
                         return logRprFileName + "_" + super.generateFileName(logLevel, timestamp) + ".log";
                     }
                 })
-                .backupStrategy(new NeverBackupStrategy())
-                .cleanStrategy(new FileLastModifiedCleanStrategy(3 * 24 * 3600 * 1000))
+                .cleanStrategy(new FileLastModifiedCleanStrategy(15 * 24 * 3600 * 1000))
                 .build();
 
         XLog.init(logConfig, filePrinter, new AndroidPrinter(), mCloudLogPrinter);
@@ -55,6 +55,16 @@ public class XLogHelper {
     public static void println(int level, String tag, String content) {
         if (printer != null) {
             printer.println(level, tag, content);
+        }
+    }
+
+    public static CloudLogPrinter getPrinter() {
+        return printer;
+    }
+
+    public static void uploadCache() {
+        if (printer != null) {//确保初始化完成
+            CloudLogPrinter.getInstance().uploadCache();
         }
     }
 }

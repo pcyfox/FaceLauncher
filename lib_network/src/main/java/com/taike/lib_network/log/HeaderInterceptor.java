@@ -1,7 +1,5 @@
 package com.taike.lib_network.log;
 
-import android.text.TextUtils;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,6 +10,8 @@ import okhttp3.Response;
 
 public class HeaderInterceptor implements Interceptor {
     private Map<String, String> mHeadMap;
+    private Filter filter;
+    private static final String TAG = "HeaderInterceptor";
 
     public HeaderInterceptor() {
         mHeadMap = new HashMap<>();
@@ -21,12 +21,19 @@ public class HeaderInterceptor implements Interceptor {
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request.Builder builder = chain.request().newBuilder();
+        String encodedPath = chain.request().url().toString();
+        if (filter != null && filter.filter(encodedPath)) {
+           // Log.d(TAG, "intercept() called with: filter = [" + true + "]");
+            return chain.proceed(builder.build());
+        }
+      //  Log.d(TAG, "intercept() called with: mHeadMap = [" + mHeadMap + "]");
         for (String key : mHeadMap.keySet()) {
             String value = mHeadMap.get(key);
-            if (!TextUtils.isEmpty(value)) {
+            if (value != null) {
                 builder.addHeader(key, value);
             }
         }
+
         return chain.proceed(builder.build());
     }
 
@@ -34,9 +41,17 @@ public class HeaderInterceptor implements Interceptor {
         mHeadMap.put("device-id", clientId);
     }
 
-    public void setUidToken(String uid, String token) {
+
+    public void setPkgName(String pkgName) {
+        mHeadMap.put("pkg-name", pkgName);
+    }
+
+    public void setAppVersionCode(String code) {
+        mHeadMap.put("app-version-code", code);
+    }
+
+    public void setUid(String uid ) {
         mHeadMap.put("uid", uid);
-        mHeadMap.put("token", token);
     }
 
     public void setAuthorization(String authorization) {
@@ -47,4 +62,11 @@ public class HeaderInterceptor implements Interceptor {
         mHeadMap.put(key, value);
     }
 
+    public void setFilter(Filter filter) {
+        this.filter = filter;
+    }
+
+    public Map<String, String> getHeadMap() {
+        return mHeadMap;
+    }
 }

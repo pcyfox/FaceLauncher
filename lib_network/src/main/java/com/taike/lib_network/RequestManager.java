@@ -5,11 +5,14 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.elvishew.xlog.XLog;
+import com.taike.lib_cache.DiskTools;
+import com.taike.lib_network.log.Filter;
 import com.taike.lib_network.log.HeaderInterceptor;
+import com.taike.lib_network.log.HttpLogger;
 import com.taike.lib_network.log.LogFilter;
-import com.taike.lib_network.log.Logger;
 import com.taike.lib_network.log.MyHttpLoggingInterceptor;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -19,10 +22,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RequestManager extends AbsRequest {
     private static final String TAG = "RequestManager";
-    private boolean isStopUploadLog = false;
-    private String stopTag;
-    private String cancelPrintLogTag;
-
     private static RequestManager requestManager = new RequestManager();
     private HeaderInterceptor headerInterceptor;
 
@@ -32,17 +31,18 @@ public class RequestManager extends AbsRequest {
 
     @Override
     OkHttpClient.Builder createOkHttpClientBuilder() {
-        return new OkHttpClient.Builder()
-                .retryOnConnectionFailure(true)//默认重试一次，若需要重试N次，则要实现拦截器。
-                .connectTimeout(20, TimeUnit.SECONDS)
-                .readTimeout(20, TimeUnit.SECONDS)
-                .writeTimeout(20, TimeUnit.SECONDS);
+        return new OkHttpClient().newBuilder()
+                .retryOnConnectionFailure(false)//默认重试一次，若需要重试N次，则要实现拦截器。
+                .dns(new OkHttpDns(3L))
+                .connectTimeout(3, TimeUnit.SECONDS)
+                .readTimeout(5, TimeUnit.SECONDS)
+                .writeTimeout(5, TimeUnit.SECONDS);
     }
 
     @Override
     Retrofit.Builder createRetrofitBuilder() {
         return new Retrofit.Builder()
-                .baseUrl(host)
+                .baseUrl(baseUrl)
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create());
     }
 
@@ -51,14 +51,18 @@ public class RequestManager extends AbsRequest {
     }
 
 
-    public void iniRetrofit(String clientId, String host) {
-        Log.d(TAG, "iniRetrofit() called with: clientId = [" + clientId + "], host = [" + host + "]");
-        this.host = host;
+    public void iniRetrofit(String clientId, String baseUrl, String appVersionCode, String pkgName) {
+        XLog.i(TAG + ":iniRetrofit() called with: clientId = [" + clientId + "], baseUrl = [" + baseUrl + "], appVersionCode = [" + appVersionCode + "], pkgName = [" + pkgName + "]");
+        this.baseUrl = baseUrl;
         headerInterceptor = new HeaderInterceptor();
         headerInterceptor.setDeviceId(clientId);
+        headerInterceptor.setAppVersionCode(appVersionCode);
+        headerInterceptor.setPkgName(pkgName);
         loggingInterceptor.setLevel(MyHttpLoggingInterceptor.Level.BODY);
-        loggingInterceptor.setCareHeaders("uid", "token", "client-id", "token");
-        addInterceptor(headerInterceptor, loggingInterceptor);
+        loggingInterceptor.setCareHeaders("uid", "token", "device-id", "token", "authorization");
+        cleatInterceptor();
+        addInterceptor(loggingInterceptor, headerInterceptor);
+        cleaConverterFactories();
         addConverterFactory(GsonConverterFactory.create());
         buildHttpClient();
     }
@@ -71,59 +75,76 @@ public class RequestManager extends AbsRequest {
         headerInterceptor.setAuthorization(authorization);
     }
 
+    public void setUidToken(String uid) {
+        headerInterceptor.setUid(uid);
+    }
 
-    private MyHttpLoggingInterceptor loggingInterceptor = new MyHttpLoggingInterceptor(new Logger() {
+
+    public Map<String, String> getHeader() {
+        if (headerInterceptor == null) {
+            return null;
+        }
+        return headerInterceptor.getHeadMap();
+    }
+
+    /**
+     * 设置请求头过滤器
+     *
+     * @param filter
+     */
+    public void setHeaderInterceptorFilter(Filter filter) {
+        if (headerInterceptor != null) {
+            headerInterceptor.setFilter(filter);
+        }
+    }
+
+
+    public void setHttpLoggingInterceptor(LogFilter filter) {
+        if (loggingInterceptor != null) {
+            loggingInterceptor.setFilter(filter);
+        }
+    }
+
+    private MyHttpLoggingInterceptor loggingInterceptor = new MyHttpLoggingInterceptor(new HttpLogger() {
         @Override
-        public void log(String message) {
-            if (cancelPrintLogTag != null && message.contains(cancelPrintLogTag)) {
-                return;
-            }
-            boolean stop = isStopUploadLog;
-            if (!TextUtils.isEmpty(stopTag)) {
-                stop = message.contains(stopTag);
-            }
+        public void log(String url, String message) {
             //将所有请求日志交给XLog处理
-            if (!TextUtils.isEmpty(message) && isRecordLog) {
-                if (stop) {
-                    Log.d("RetrofitLog: ", message);
-                } else {
-                    XLog.i("XRetrofitLog: " + message);
+            if (!TextUtils.isEmpty(message)) {
+                try {
+                    if (checkForUpload(url)) {
+                        XLog.i("XRetrofitLog: " + message);
+                    } else {
+                        Log.d("RetrofitLog: ", message);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }
     }
             , new LogFilter() {//日志过滤处理
         @Override
-        public String filter(String log) {
-            //屏蔽密码
-            if (log.startsWith("{") && log.contains("psw")) {
-//                try {
-//                    //TODO:如果密码未在[0-9a-zA-Z]中就会出现问题，而上面已注释的方法没这个问题
-//                    String replacedLog = log.replaceAll("psw\\\"\\:\\\"[0-9a-zA-Z]*", "psw\":\"***");
-//                    if (!TextUtils.isEmpty(replacedLog)) {
-//                        return replacedLog;
-//                    }
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-            }
+        public String filter(String url, String log) {
             return log;
         }
     });
 
-    public boolean isStopUploadLog() {
-        return isStopUploadLog;
-    }
-
-    public void setStopUploadLog(boolean stopUploadLog) {
-        isStopUploadLog = stopUploadLog;
-    }
-
-    public void stopUploadLog(String tag) {
-        this.stopTag = tag;
-    }
-
-    public void setCancelPrintLogTag(String cancelPrintLogTag) {
-        this.cancelPrintLogTag = cancelPrintLogTag;
+    private boolean checkForUpload(String url) {
+        String matchUrl = null;
+        synchronized (lock) {
+            for (String key : uploadLogRequests.keySet()) {
+                if (url.contains(key)) {
+                    matchUrl = key;
+                    break;
+                }
+            }
+            if (matchUrl != null) {
+                synchronized (lock) {
+                    Boolean isNeedUpdate = uploadLogRequests.get(matchUrl);
+                    return isNeedUpdate != null && isNeedUpdate;
+                }
+            }
+        }
+        return true;
     }
 }

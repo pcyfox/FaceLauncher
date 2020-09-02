@@ -2,6 +2,8 @@ package com.taike.lib_network.udp;
 
 import android.util.Log;
 
+import androidx.annotation.Keep;
+
 import com.elvishew.xlog.XLog;
 
 import java.io.IOException;
@@ -16,25 +18,25 @@ import java.util.concurrent.Executors;
 /**
  * Created by melo on 2017/9/20.
  */
-
+@Keep
 public class UDPSocketClient {
-
-    private MsgArrivedListener msgArrivedListener;
+    private OnSocketMsgArrivedListener msgArrivedListener;
+    private OnStateChangeLister onStateChangeLister;
     private static UDPSocketClient instance;
     private static final String TAG = "UDPSocket";
     // 单个CPU线程池大小
-    private static final int POOL_SIZE = 2;
+    private static final int POOL_SIZE = 5;
     private static final int BUFFER_LENGTH = 8 * 1024;
     private byte[] receiveByte = new byte[BUFFER_LENGTH];
 
     private static final String BROADCAST_IP = "255.255.255.255";
 
     // 端口号，
-    public static int CLIENT_PORT = 2008;
-    public static int SERVER_PORT = 1099;
+    private int CLIENT_PORT = 2168;
+    public int SERVER_PORT = 1099;
     public static String SERVER_IP = "";
 
-    private boolean isThreadRunning = false;
+    private volatile boolean isThreadRunning = false;
     private DatagramSocket client;
     private DatagramPacket receivePacket;
     private long lastReceiveTime = 0;
@@ -63,12 +65,16 @@ public class UDPSocketClient {
         CLIENT_PORT = port;
     }
 
-
     public static UDPSocketClient getInstance() {
         if (instance == null) {
             instance = new UDPSocketClient();
         }
         return instance;
+    }
+
+    public void setClientPort(int clientPort) {
+        XLog.i(TAG + ":setClientPort() called with: clientPort = [" + clientPort + "]");
+        CLIENT_PORT = clientPort;
     }
 
     public void startUDPSocket() {
@@ -89,11 +95,11 @@ public class UDPSocketClient {
         }
     }
 
-    public MsgArrivedListener getMsgArrivedListener() {
+    public OnSocketMsgArrivedListener getMsgArrivedListener() {
         return msgArrivedListener;
     }
 
-    public void setMsgArrivedListener(MsgArrivedListener msgArrivedListener) {
+    public void setMsgArrivedListener(OnSocketMsgArrivedListener msgArrivedListener) {
         this.msgArrivedListener = msgArrivedListener;
     }
 
@@ -104,19 +110,22 @@ public class UDPSocketClient {
         clientThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                XLog.d(TAG + ";clientThread is running...");
+                XLog.d("clientThread is running...");
                 receiveMessage();
             }
         });
         isThreadRunning = true;
         clientThread.start();
+        if (onStateChangeLister != null) {
+            onStateChangeLister.onStart();
+        }
     }
 
     /**
      * 处理接受到的消息
      */
     private void receiveMessage() {
-        while (isThreadRunning && msgArrivedListener != null) {
+        while (isThreadRunning && msgArrivedListener != null && !Thread.interrupted()) {
             try {
                 if (client != null) {
                     client.receive(receivePacket);
@@ -136,8 +145,9 @@ public class UDPSocketClient {
             try {
                 String strReceive = new String(receivePacket.getData(), 0, receivePacket.getLength(), "utf-8");
                 XLog.d("接收到广播数据 " + receivePacket.getAddress().getHostAddress() + ":" + receivePacket.getPort() + "  内容  " + strReceive);
+
                 if (msgArrivedListener != null) {
-                    msgArrivedListener.onMsgArrived(strReceive);
+                    msgArrivedListener.onSocketMsgArrived(strReceive);
                 }
                 // 每次接收完UDP数据后，重置长度。否则可能会导致下次收到数据包被截断。
                 if (receivePacket != null) {
@@ -151,6 +161,7 @@ public class UDPSocketClient {
     }
 
     public void stopUDPSocket() {
+        Log.d(TAG, "stopUDPSocket() called");
         isThreadRunning = false;
         receivePacket = null;
         if (clientThread != null) {
@@ -164,7 +175,19 @@ public class UDPSocketClient {
             timer.exit();
         }
         isStarted = false;
+
+        if (onStateChangeLister != null) {
+            onStateChangeLister.onStop();
+        }
     }
+
+
+    public void clear() {
+        stopUDPSocket();
+        onStateChangeLister = null;
+        msgArrivedListener = null;
+    }
+
 
     /**
      * 启动心跳，timer 间隔十秒
@@ -196,7 +219,6 @@ public class UDPSocketClient {
         if (client == null) {
             return;
         }
-        Log.d(TAG, "sendBroadcast() called with: message = [" + message + "]");
         mThreadPool.execute(new Runnable() {
             @Override
             public void run() {
@@ -205,6 +227,7 @@ public class UDPSocketClient {
                     DatagramPacket packet = new DatagramPacket(message.getBytes(), message.getBytes().length, targetAddress, CLIENT_PORT);
                     try {
                         client.send(packet);
+                        XLog.i("sendBroadcast message:" + message);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -228,8 +251,6 @@ public class UDPSocketClient {
                     client.send(packet);
                     // 数据发送事件
                     XLog.d("数据发送成功");
-                } catch (UnknownHostException e) {
-                    e.printStackTrace();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -238,7 +259,24 @@ public class UDPSocketClient {
         });
     }
 
-    public interface MsgArrivedListener {
-        void onMsgArrived(String msg);
+    public OnStateChangeLister getOnStateChangeLister() {
+        return onStateChangeLister;
     }
+
+    public void setOnStateChangeLister(OnStateChangeLister onStateChangeLister) {
+        this.onStateChangeLister = onStateChangeLister;
+    }
+
+    public interface OnSocketMsgArrivedListener {
+        void onSocketMsgArrived(String msg);
+    }
+
+
+    public interface OnStateChangeLister {
+        void onStart();
+
+        void onStop();
+    }
+
+
 }

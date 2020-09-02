@@ -4,18 +4,23 @@ package com.taike.lib_network;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-
-
+import okhttp3.Cache;
+import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
 import okhttp3.HttpUrl;
+import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+
 /**
  * description ： 可直接用于网络请求的工具类
  * author : LN
@@ -27,19 +32,45 @@ public class OKHttpUtils {
 
     public static void get(@NonNull String url, @NonNull Callback callback) {
         final OkHttpClient client = new OkHttpClient();
+        try {
+            Cache cache = client.cache();
+            if (cache != null) {
+                cache.delete();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         Request request = new Request.Builder()
                 .url(url)
                 .build();
         client.newCall(request).enqueue(callback);
+
     }
 
 
     public static void get(@NonNull String url, @Nullable Map<String, String> params, @Nullable Map<String, String> header, @NonNull Callback callback) {
-        get(getOkHttpClient(), url, params, header, callback);
+        get(getOkHttpClient(), url, params, header, false, callback);
+    }
+
+    /**
+     * 同步请求
+     *
+     * @param url
+     * @param params
+     * @param header
+     * @param callback
+     */
+    public static void syncGet(@NonNull String url, @Nullable Map<String, String> params, @Nullable Map<String, String> header, @NonNull Callback callback) {
+        get(getOkHttpClient(), url, params, header, true, callback);
     }
 
 
-    public static void get(@NonNull OkHttpClient client, @NonNull String url, @Nullable Map<String, String> params, @Nullable Map<String, String> header, @NonNull Callback callback) {
+    public static void syncGet(@NonNull String url, @NonNull Callback callback) {
+        get(getOkHttpClient(), url, null, null, true, callback);
+    }
+
+
+    public static void get(@NonNull OkHttpClient client, @NonNull String url, @Nullable Map<String, String> params, @Nullable Map<String, String> header, boolean sync, @NonNull Callback callback) {
         Request.Builder reqBuild = new Request.Builder();
         HttpUrl httpUrl = HttpUrl.parse(url);
         if (httpUrl == null) {
@@ -58,7 +89,30 @@ public class OKHttpUtils {
         }
         reqBuild.url(urlBuilder.build());
         Request request = reqBuild.build();
-        client.newCall(request).enqueue(callback);
+        if (sync) {
+            try {
+                Call call = client.newCall(request);
+                Response temp = call.execute();
+                if (temp != null) {
+
+                    if (temp.isSuccessful()) {
+                        ResponseBody body = temp.body();
+                        //call string auto close body
+                        callback.onResponse(call, temp);
+                    } else {
+                        callback.onFailure(call, new IOException("fail"));
+                    }
+                } else {
+                    callback.onFailure(call, new IOException("fail"));
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            client.newCall(request).enqueue(callback);
+        }
+
     }
 
     public static void get(@NonNull OkHttpClient client, @NonNull String url, @NonNull Callback callback) {
@@ -66,6 +120,14 @@ public class OKHttpUtils {
         client.newCall(request).enqueue(callback);
     }
 
+    public static void syncGet(@NonNull OkHttpClient client, @NonNull String url, @NonNull Callback callback) {
+        Request request = new Request.Builder().url(url).build();
+        try {
+            client.newCall(request).execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void post(@NonNull OkHttpClient client, @NonNull String url, Map<String, String> param, Map<String, String> header, @NonNull Callback callback) {
         Request.Builder builder = new Request.Builder().url(url);
@@ -112,14 +174,42 @@ public class OKHttpUtils {
     }
 
 
-    public static OkHttpClient getOkHttpClient() {
+    public static String getSys(String url) {
+        Request request = new Request.Builder().url(url).build();
+        Call call = getOkHttpClient().newCall(request);
+        Response response = null;
+        try {
+            response = call.execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (response != null) {
+            if (response.isSuccessful()) {
+                try {
+                    return response.body().string();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return null;
+    }
+
+
+    public static OkHttpClient getOkHttpClient(Interceptor... interceptors) {
         if (okHttpClient == null) {
-            okHttpClient = new OkHttpClient.Builder()
+            OkHttpClient.Builder builder = new OkHttpClient.Builder()
                     .retryOnConnectionFailure(true)//默认重试一次，若需要重试N次，则要实现拦截器。
-                    .connectTimeout(12, TimeUnit.SECONDS)
-                    .readTimeout(18, TimeUnit.SECONDS)
-                    .writeTimeout(18, TimeUnit.SECONDS)
-                    .build();
+                    .connectTimeout(10, TimeUnit.SECONDS)
+                    .readTimeout(10, TimeUnit.SECONDS)
+                    .writeTimeout(10, TimeUnit.SECONDS);
+
+            if (interceptors != null && interceptors.length > 0) {
+                for (Interceptor interceptor : interceptors) {
+                    builder.addInterceptor(interceptor);
+                }
+            }
+            okHttpClient = builder.build();
         }
         return okHttpClient;
     }

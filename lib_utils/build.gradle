@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 
 def rootDependencies = rootProject.ext.dependencies
 android {
@@ -29,7 +30,12 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     //@see :https://github.com/Blankj/AndroidUtilCode
-    api 'com.blankj:utilcode:1.24.7'
     api 'com.elvishew:xlog:1.6.1'
     api rootDependencies.appcompat
+    api rootDependencies.utilcode
+    implementation rootDependencies.ktx
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+}
+repositories {
+    mavenCentral()
 }

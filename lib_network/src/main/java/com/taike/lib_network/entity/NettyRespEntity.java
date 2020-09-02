@@ -2,7 +2,7 @@ package com.taike.lib_network.entity;
 
 public class NettyRespEntity<D> {
     private String from;
-    private int id;
+    private int id;//发送者ID
     private String action;
     private D data;
     private int code;

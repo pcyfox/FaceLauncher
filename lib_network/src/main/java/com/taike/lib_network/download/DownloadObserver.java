@@ -31,8 +31,8 @@ public class DownloadObserver implements Observer<DownloadInfo> {
     @Override
     public void onError(Throwable e) {
         if(downloadInfo!=null){
-            if (DownloadManager.getInstance().isDownCallContainsUrl(downloadInfo.getKey())) {
-                DownloadManager.getInstance().pauseDownload(downloadInfo.getKey());
+            if (DownloadManager.getInstance().isDownCallContainsUrl(downloadInfo.getCacheKey())) {
+                DownloadManager.getInstance().pauseDownload(downloadInfo.getCacheKey());
                 downloadInfo.setDownloadStatus(DownloadInfo.DOWNLOAD_ERROR);
                 callback.onError(e.getMessage());
             } else {

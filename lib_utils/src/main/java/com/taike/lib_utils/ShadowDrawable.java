@@ -99,7 +99,7 @@ public class ShadowDrawable extends Drawable {
     }
 
     public static void setShadowDrawable(View view, int shapeRadius, int shadowColor, int shadowRadius, int offsetX, int offsetY) {
-        ShadowDrawable drawable = new ShadowDrawable.Builder()
+        ShadowDrawable drawable = new Builder()
                 .setShapeRadius(shapeRadius)
                 .setShadowColor(shadowColor)
                 .setShadowRadius(shadowRadius)
@@ -111,7 +111,7 @@ public class ShadowDrawable extends Drawable {
     }
 
     public static void setShadowDrawable(View view, int bgColor, int shapeRadius, int shadowColor, int shadowRadius, int offsetX, int offsetY) {
-        ShadowDrawable drawable = new ShadowDrawable.Builder()
+        ShadowDrawable drawable = new Builder()
                 .setBgColor(bgColor)
                 .setShapeRadius(shapeRadius)
                 .setShadowColor(shadowColor)
@@ -124,7 +124,7 @@ public class ShadowDrawable extends Drawable {
     }
 
     public static void setShadowDrawable(View view, int shape, int bgColor, int shapeRadius, int shadowColor, int shadowRadius, int offsetX, int offsetY) {
-        ShadowDrawable drawable = new ShadowDrawable.Builder()
+        ShadowDrawable drawable = new Builder()
                 .setShape(shape)
                 .setBgColor(bgColor)
                 .setShapeRadius(shapeRadius)
@@ -138,7 +138,7 @@ public class ShadowDrawable extends Drawable {
     }
 
     public static void setShadowDrawable(View view, int[] bgColor, int shapeRadius, int shadowColor, int shadowRadius, int offsetX, int offsetY) {
-        ShadowDrawable drawable = new ShadowDrawable.Builder()
+        ShadowDrawable drawable = new Builder()
                 .setBgColor(bgColor)
                 .setShapeRadius(shapeRadius)
                 .setShadowColor(shadowColor)

@@ -3,6 +3,7 @@ package com.taike.lib_network.tcp.client.handler;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.elvishew.xlog.XLog;
 import com.taike.lib_network.tcp.client.listener.NettyClientListener;
 import com.taike.lib_network.tcp.client.status.ConnectState;
 
@@ -21,13 +22,15 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<String> {
     private int index;
     private Object heartBeatData;
     private String packetSeparator;
+    private NettyClientCallback nettyClientCallback;
 
-    public NettyClientHandler(NettyClientListener<String> listener, int index, boolean isSendheartBeat, Object heartBeatData, String separator) {
+    public NettyClientHandler(NettyClientListener<String> listener, int index, boolean isSendheartBeat, Object heartBeatData, String separator, NettyClientCallback nettyClientCallback) {
         this.listener = listener;
         this.index = index;
         this.isSendheartBeat = isSendheartBeat;
         this.heartBeatData = heartBeatData;
         this.packetSeparator = TextUtils.isEmpty(separator) ? System.getProperty("line.separator") : separator;
+        this.nettyClientCallback = nettyClientCallback;
     }
 
     /**
@@ -72,6 +75,10 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<String> {
     public void channelActive(ChannelHandlerContext ctx) {
         //    Log.e(TAG, "------->channelActive");
 //        NettyTcpClient.getInstance().setConnectStatus(true);
+        XLog.d("netty客户端---->channelActive");
+        if (nettyClientCallback != null) {
+            nettyClientCallback.onConnect();
+        }
         listener.onClientStatusConnectChanged(ConnectState.STATUS_CONNECT_SUCCESS, index);
     }
 
@@ -83,6 +90,10 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<String> {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
         //    Log.e(TAG, "------->channelInactive");
+        XLog.d("netty客户端---->channelInactive");
+        if (nettyClientCallback != null) {
+            nettyClientCallback.onDisconnect();
+        }
         listener.onClientStatusConnectChanged(ConnectState.STATUS_CONNECT_CLOSED, index);
     }
 
@@ -104,6 +115,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<String> {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         Log.e(TAG, "exceptionCaught");
+        XLog.d("netty客户端---->exceptionCaught");
         listener.onClientStatusConnectChanged(ConnectState.STATUS_CONNECT_ERROR, index);
         cause.printStackTrace();
         ctx.close();

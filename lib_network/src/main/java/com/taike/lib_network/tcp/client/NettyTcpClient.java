@@ -4,6 +4,8 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.elvishew.xlog.XLog;
+import com.taike.lib_network.tcp.client.handler.NettyClientCallback;
 import com.taike.lib_network.tcp.client.handler.NettyClientHandler;
 import com.taike.lib_network.tcp.client.listener.MessageStateListener;
 import com.taike.lib_network.tcp.client.listener.NettyClientListener;
@@ -71,7 +73,7 @@ public class NettyTcpClient {
     /**
      * 是否发送心跳
      */
-    private boolean isSendheartBeat = false;
+    private boolean isSendheartBeat = true;
 
     /**
      * 心跳数据，可以是String类型，也可以是byte[].
@@ -140,6 +142,19 @@ public class NettyTcpClient {
     }
 
 
+    private NettyClientCallback nettyClientCallback = new NettyClientCallback() {
+
+        @Override
+        public void onConnect() {
+            isConnect = true;
+        }
+
+        @Override
+        public void onDisconnect() {
+            isConnect = false;
+        }
+    };
+
     private void connectServer() {
         synchronized (NettyTcpClient.this) {
             ChannelFuture channelFuture = null;
@@ -147,7 +162,7 @@ public class NettyTcpClient {
                 group = new NioEventLoopGroup();
                 Bootstrap bootstrap = new Bootstrap().group(group)
                         .option(ChannelOption.TCP_NODELAY, true)//屏蔽Nagle算法试图
-                        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
+                        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000)
                         .channel(NioSocketChannel.class)
                         .handler(new ChannelInitializer<SocketChannel>() {
                             @Override
@@ -165,13 +180,11 @@ public class NettyTcpClient {
                                     ch.pipeline().addLast(new LineBasedFrameDecoder(maxPacketLong));
                                 }
 
-
                                 ch.pipeline().addLast(new StringEncoder(CharsetUtil.UTF_8));
                                 ch.pipeline().addLast(new StringDecoder(CharsetUtil.UTF_8));
                                 // 定义一个发送消息协议格式：|--header:4 byte--|--content:2MB--|
-                                ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(1024*1024*2,0,4,0,4));
-
-                                ch.pipeline().addLast(new NettyClientHandler(listener, mIndex, isSendheartBeat, heartBeatData, packetSeparator));
+                                ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(1024 * 1024 * 2, 0, 4, 0, 4));
+                                ch.pipeline().addLast(new NettyClientHandler(listener, mIndex, isSendheartBeat, heartBeatData, packetSeparator, nettyClientCallback));
                             }
                         });
 
@@ -181,12 +194,13 @@ public class NettyTcpClient {
                         public void operationComplete(ChannelFuture channelFuture) throws Exception {
                             if (channelFuture.isSuccess()) {
                                 isConnect = true;
-                                Log.e(TAG, "连接成功");
+                                XLog.i(TAG + ":连接成功");
                                 reconnectNum = MAX_CONNECT_TIMES;
                                 channel = channelFuture.channel();
                                 listener.onClientStatusConnectChanged(ConnectState.STATUS_CONNECT_SUCCESS, mIndex);
                             } else {
-                                Log.e(TAG, "连接失败");
+                                XLog.w(TAG + ":连接失败");
+                                listener.onClientStatusConnectChanged(ConnectState.STATUS_CONNECT_ERROR, mIndex);
                                 isConnect = false;
                             }
                         }
@@ -197,9 +211,8 @@ public class NettyTcpClient {
                     Log.e(TAG, " 断开连接");
                 } catch (Exception e) {
                     e.printStackTrace();
-                } finally {
                     isConnect = false;
-
+                    XLog.d(TAG + "netty客户端----> connectServer   Exception 连接失败");
                     listener.onClientStatusConnectChanged(ConnectState.STATUS_CONNECT_CLOSED, mIndex);
                     if (null != channelFuture) {
                         if (channelFuture.channel() != null && channelFuture.channel().isOpen()) {
@@ -207,7 +220,16 @@ public class NettyTcpClient {
                         }
                     }
                     group.shutdownGracefully();
+                    try {
+                        XLog.d(TAG + "netty客户端----> connectServer    Thread.sleep ");
+                        Thread.sleep(5000);
+                    } catch (Exception ex) {
+                        //不会调用
+                    }
+                    XLog.d(TAG + "netty客户端----> connectServer    Thread.sleep +");
                     reconnect();
+                } finally {
+
                 }
             }
         }
@@ -215,19 +237,18 @@ public class NettyTcpClient {
 
 
     public void disconnect() {
-        Log.e(TAG, "disconnect");
+        XLog.w(TAG, "disconnect() called!");
         isNeedReconnect = false;
         isConnect = false;
         group.shutdownGracefully();
     }
 
     public void reconnect() {
-        Log.e(TAG, "reconnect");
         if (isNeedReconnect && reconnectNum > 0 && !isConnect) {
             reconnectNum--;
             SystemClock.sleep(reconnectIntervalTime);
             if (isNeedReconnect && reconnectNum > 0 && !isConnect) {
-                Log.e(TAG, "重新连接");
+                XLog.w(TAG + ":重新连接,第%d次", reconnectNum);
                 connectServer();
             }
         }
@@ -244,7 +265,7 @@ public class NettyTcpClient {
         boolean flag = channel != null && isConnect;
         if (flag) {
             String separator = TextUtils.isEmpty(packetSeparator) ? System.getProperty("line.separator") : packetSeparator;
-            channel.pipeline().addLast( new LengthFieldPrepender(4));
+            channel.pipeline().addLast(new LengthFieldPrepender(4));
             ChannelFuture channelFuture = channel.writeAndFlush(data + separator).addListener(new ChannelFutureListener() {
                 @Override
                 public void operationComplete(ChannelFuture channelFuture) throws Exception {

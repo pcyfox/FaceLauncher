@@ -5,17 +5,19 @@ import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-
 import com.elvishew.xlog.XLog;
+import com.jakewharton.disklrucache.DiskLruCache;
+import com.taike.lib_cache.DiskCacheManager;
+import com.taike.lib_network.BuildConfig;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.ref.SoftReference;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import io.reactivex.Observable;
@@ -27,7 +29,6 @@ import io.reactivex.functions.Function;
 import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -43,12 +44,14 @@ public class DownloadManager {
     private static final AtomicReference<DownloadManager> INSTANCE = new AtomicReference<>();
     private OkHttpClient okHttpClient;
     private HashMap<DownloadInfo.Key, Call> downCalls; //用来存放各个下载的请求
-    private WeakHashMap<DownloadInfo.Key, DownloadInfo> downloadInfoMap = new WeakHashMap<>();
-    private String storePath;
+    private SoftReference<Map<DownloadInfo.Key, DownloadInfo>> memoryCache;
+    private DiskCacheManager diskCacheManager;
+
     private boolean isSupportBreakpointDown;
-    private boolean isUseCache;
     private DownLoadCallback callback;
     private static MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+    private String defStoreDir = Environment.getExternalStorageDirectory().getPath() + File.separator + "DownloadManager";
+    private final boolean isDebug = BuildConfig.DEBUG;
 
     public static DownloadManager getInstance() {
         for (; ; ) {
@@ -66,7 +69,8 @@ public class DownloadManager {
     private DownloadManager() {
         downCalls = new HashMap<>();
         okHttpClient = new OkHttpClient.Builder().build();
-        storePath = Environment.getExternalStorageDirectory().getPath() + File.separator + "DownloadManager";
+        Map<DownloadInfo.Key, DownloadInfo> map = new HashMap<>();
+        memoryCache = new SoftReference<>(map);
     }
 
 
@@ -88,39 +92,31 @@ public class DownloadManager {
         return downCalls.containsKey(key);
     }
 
-    public String getStorePath() {
-        return storePath;
-    }
-
-    public DownloadManager setStorePath(String storePath) {
-        this.storePath = storePath;
-        return this;
-    }
-
     public DownloadManager setSupportBreakpointDown(boolean isSupportBreakpointDown) {
         this.isSupportBreakpointDown = isSupportBreakpointDown;
         return this;
     }
 
 
-    public DownloadManager setUseCache(boolean useCache) {
-        isUseCache = useCache;
-        return this;
-    }
-
-
-    public void download(final String url, final String jsonParam, final String name, final Map<String, String> headers, DownLoadCallback callback) {
-        XLog.d(TAG + ":  download() called with: url = [" + url + "], jsonParam = [" + jsonParam + "], headers = [" + headers + "], callback = [" + callback + "]");
+    public void download(final String url, final String cacheKey, final String jsonParam, final String fileName, final String storeDir, final Map<String, String> headers, final boolean isUseCache, DownLoadCallback callback) {
+        //Cache- Control:no-cache
+        if (isDebug)
+            Log.d(TAG, "download() called with: url = [" + url + "], cacheKey = [" + cacheKey + "], jsonParam = [" + jsonParam + "], fileName = [" + fileName + "], storeDir = [" + storeDir + "], headers = [" + headers + "], isUseCache = [" + isUseCache + "], callback = [" + callback + "]");
         this.callback = callback;
         if (TextUtils.isEmpty(url) || callback == null) {
             return;
         }
+
         if (isUseCache) {
-            DownloadInfo info = getDownloadInfo(new DownloadInfo.Key(url));
+            String key = TextUtils.isEmpty(cacheKey) ? url + jsonParam : cacheKey;
+            DownloadInfo info = getCacheDownloadInfo(new DownloadInfo.Key(key), url);
             if (info != null && info.getDownloadStatus() == DownloadInfo.DOWNLOAD_OVER && new File(info.getDownloadFilePath()).exists()) {
-                XLog.d(TAG + ":hunt file from cache");
-                callback.onFinish(info.getDownloadFilePath());
+                addToMemoryCache(info);
+                String localPath = info.getDownloadFilePath();
+                callback.onFinish(localPath);
                 return;
+            } else {
+                XLog.i(TAG + ": not found cache");
             }
         }
 
@@ -133,7 +129,7 @@ public class DownloadManager {
                 .map(new Function<String, DownloadInfo>() { // 生成 DownloadInfo
                     @Override
                     public DownloadInfo apply(String url) {
-                        return createDownInfo(url, jsonParam, name, headers);
+                        return createDownInfo(url, cacheKey, isUseCache, jsonParam, fileName, storeDir, headers);
                     }
                 })
                 .map(new Function<DownloadInfo, DownloadInfo>() { // 如果已经下载，重新命名
@@ -151,7 +147,6 @@ public class DownloadManager {
                 .observeOn(AndroidSchedulers.mainThread()) // 事件回调的线程
                 .subscribeOn(Schedulers.io()) //事件执行的线程
                 .subscribe(new DownloadObserver(callback)); //  添加观察者，监听下载进度
-
     }
 
 
@@ -160,14 +155,27 @@ public class DownloadManager {
      *
      * @param url 下载请求的网址
      */
-    public void download(final String url, DownLoadCallback callback) {
-        download(url, null, null, null, callback);
+    public void download(final String url, boolean isUseCache, DownLoadCallback callback) {
+        download(url, null, null, null, null, null, isUseCache, callback);
     }
 
-    public void download(String url, String storePath, DownLoadCallback callback) {
-        this.storePath = storePath;
-        download(url, callback);
+    public void download(final String url, DownLoadCallback callback) {
+        download(url, null, null, null, null, null, true, callback);
     }
+
+    public void downloadWithCacheKey(final String url, String cacheKey, DownLoadCallback callback) {
+        download(url, cacheKey, null, null, null, null, true, callback);
+    }
+
+
+    public void downloadToDir(String dUrl, String storeDir, String cacheKey, boolean isUseCache, DownLoadCallback downloadUrlCallback) {
+        download(dUrl, cacheKey, null, null, storeDir, null, isUseCache, downloadUrlCallback);
+    }
+
+    public void downloadToDir(String dUrl, String storeDir, boolean isUseCache, DownLoadCallback downloadUrlCallback) {
+        download(dUrl, null, null, null, storeDir, null, isUseCache, downloadUrlCallback);
+    }
+
 
     /**
      * 下载取消或者暂停
@@ -182,47 +190,80 @@ public class DownloadManager {
         downCalls.remove(key);
     }
 
+    public String getDefStoreDir() {
+        return defStoreDir;
+    }
+
     /**
      * 取消下载 删除本地文件
      *
      * @param info
      */
     public void cancelDownload(DownloadInfo info) {
-        pauseDownload(info.getKey());
+        pauseDownload(info.getCacheKey());
         info.setProgress(0);
         info.setDownloadStatus(DownloadInfo.DOWNLOAD_CANCEL);
     }
 
 
     public void cancelDownload(DownloadInfo.Key key) {
-        DownloadInfo info = downloadInfoMap.get(key);
+        if (memoryCache.get() == null) {
+            return;
+        }
+        DownloadInfo info = memoryCache.get().get(key);
         if (info != null) {
             cancelDownload(info);
         }
     }
 
 
-    public DownloadInfo getDownloadInfo(DownloadInfo.Key key) {
-        return downloadInfoMap.get(key);
-    }
-
-    public int getDownloadStatus(DownloadInfo.Key key) {
-        DownloadInfo info = getDownloadInfo(key);
-        if (info == null) {
-            return -200;
-        }
-        return info.getDownloadStatus();
-    }
-
-
-    public void clear() {
-        for (DownloadInfo info : downloadInfoMap.values()) {
-            if (info != null) {
-                cancelDownload(info);
+    public DownloadInfo getCacheDownloadInfo(DownloadInfo.Key key, String url) {
+        DownloadInfo downloadInfo = null;
+        if (memoryCache != null && memoryCache.get() != null) {
+            downloadInfo = memoryCache.get().get(key);
+            if (downloadInfo != null) {
+                XLog.i(TAG + ":hunt file from ------------>memoryCache localPath:" + downloadInfo.getDownloadFilePath());
+                return downloadInfo;
             }
         }
-        downloadInfoMap.clear();
 
+        File file = DiskCacheManager.INSTANCE().getFile(key.getKey(), DownloadInfo.getType(url));
+        if (file != null && file.exists()) {
+            downloadInfo = new DownloadInfo(url);
+            downloadInfo.setDownloadStatus(DownloadInfo.DOWNLOAD_OVER);
+            downloadInfo.setDownloadFilePath(file.getAbsolutePath());
+            XLog.i(TAG + ":hunt file from ------------>diskCache localPath:" + downloadInfo.getDownloadFilePath());
+        }
+        return downloadInfo;
+    }
+
+
+    private void addToMemoryCache(DownloadInfo downloadInfo) {
+        Log.d(TAG, "addToMemoryCache() called with: downloadInfo = [" + downloadInfo + "]");
+        if (memoryCache != null && memoryCache.get() != null) {
+            memoryCache.get().put(downloadInfo.getCacheKey(), downloadInfo);
+        }
+    }
+
+
+    public void clearCache() {
+        if (memoryCache.get() != null) {
+            for (DownloadInfo info : memoryCache.get().values()) {
+                if (info != null) {
+                    cancelDownload(info);
+                }
+            }
+            memoryCache.clear();
+        }
+
+
+        if (diskCacheManager != null) {
+            diskCacheManager.clear();
+        }
+    }
+
+
+    public void clearTask() {
         if (downCalls != null) {
             for (Call call : downCalls.values()) {
                 if (call != null) {
@@ -233,34 +274,53 @@ public class DownloadManager {
         }
     }
 
-    public void clearCache() {
-        clear();
-        File cacheFile = new File(storePath);
+    public void clear() {
+        clearCache();
+        clearTask();
+        callback = null;
+        File cacheFile = new File(defStoreDir);
         if (cacheFile.exists()) {
             cacheFile.delete();
         }
     }
 
-    /**
-     * 创建DownInfo
-     *
-     * @param url 请求网址
-     * @return DownInfo
-     */
-    private DownloadInfo createDownInfo(String url) {
-        return createDownInfo(url, "", null, null);
-    }
 
-    private DownloadInfo createDownInfo(String url, String jsonParam, String name, Map<String, String> headers) {
+    private DownloadInfo createDownInfo(String url, String cacheKey, boolean isUseCache, String jsonParam, String name, String storePath, Map<String, String> headers) {
+        String key = TextUtils.isEmpty(cacheKey) ? url + jsonParam : cacheKey;
+        String rootPath = defStoreDir;
+        if (!TextUtils.isEmpty(storePath) && new File(storePath).isDirectory()) {
+            rootPath = storePath;
+        }
         DownloadInfo downloadInfo = new DownloadInfo(url);
+        downloadInfo.setStoreDir(rootPath);
         downloadInfo.setHeaders(headers);
+        downloadInfo.setUseCache(isUseCache);
+        downloadInfo.setCacheKey(new DownloadInfo.Key(key));
         downloadInfo.setJsonParam(jsonParam);
-        downloadInfoMap.put(downloadInfo.getKey(), downloadInfo);
         long contentLength = getContentLength(url);//获得文件大小
         downloadInfo.setTotal(contentLength);
-        String fileName = TextUtils.isEmpty(name) ? url.substring(url.lastIndexOf("/")) : name;
+        String fileName = TextUtils.isEmpty(name) ? getFileNameFormUrl(url) : name;
         downloadInfo.setFileName(fileName);
+
+        if (memoryCache.get() == null) {
+            Map<DownloadInfo.Key, DownloadInfo> map = new HashMap<>();
+            memoryCache = new SoftReference<>(map);
+        }
         return downloadInfo;
+    }
+
+    private String getFileNameFormUrl(String url) {
+        int pointIndex = url.lastIndexOf(".");
+        if (url.length() - pointIndex >= 3 && url.length() - pointIndex <= 5) {
+            return url.substring(pointIndex - 5);
+        }
+
+        int index = url.indexOf("?");
+        if (index > 0) {
+            String sub = url.substring(0, index);
+            return sub.substring(url.lastIndexOf("/"));
+        }
+        return url;
     }
 
     /**
@@ -273,12 +333,12 @@ public class DownloadManager {
         String fileName = downloadInfo.getFileName();
         long downloadLength = 0;
         long contentLength = downloadInfo.getTotal();
-        File path = new File(storePath);
+        File path = new File(downloadInfo.getStoreDir());
         if (!path.exists()) {
             path.mkdir();
         }
 
-        File file = new File(storePath, fileName);
+        File file = new File(downloadInfo.getStoreDir(), fileName);
         if (isSupportBreakpointDown) {
             if (file.exists()) {
                 //找到了文件,代表已经下载过（但不见得下载全）,则获取其长度
@@ -295,7 +355,7 @@ public class DownloadManager {
                     fileNameOther = fileName.substring(0, dotIndex)
                             + "(" + i + ")" + fileName.substring(dotIndex);
                 }
-                File newFile = new File(storePath, fileNameOther);
+                File newFile = new File(downloadInfo.getStoreDir(), fileNameOther);
                 file = newFile;
                 downloadLength = newFile.length();
                 i++;
@@ -323,14 +383,12 @@ public class DownloadManager {
             executeDownload(emitter);
         }
 
-
         private void executeDownload(ObservableEmitter<DownloadInfo> emitter) throws IOException {
             String url = downloadInfo.getUrl();
             long downloadLength = downloadInfo.getProgress();//已经下载好的长度
             long contentLength = downloadInfo.getTotal();//文件的总长度
             //初始进度信息
             emitter.onNext(downloadInfo);
-
             Request.Builder builder = new Request.Builder()
                     //确定下载的范围,添加此头,则服务器就可以跳过已经下载好的部分
                     .addHeader("RANGE", "bytes=" + downloadLength + "-" + contentLength)
@@ -349,12 +407,15 @@ public class DownloadManager {
 
             Request request = builder.build();
             Call call = okHttpClient.newCall(request);
-            downCalls.put(downloadInfo.getKey(), call);//把这个添加到call里,方便取消
+            downCalls.put(downloadInfo.getCacheKey(), call);//把这个添加到call里,方便取消
             //直接请求（未使用线程池）
             Response response = call.execute();
-            storePath = TextUtils.isEmpty(storePath) ? Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() : storePath;
-            File file = new File(storePath, downloadInfo.getFileName());
+            String storePath = downloadInfo.getStoreDir();
+            if (isDebug)
+                Log.d(TAG, "executeDownload()  downloadInfo = [" + downloadInfo + "]");
+
             FileOutputStream fileOutputStream = null;
+            OutputStream outputStream = null;
             ResponseBody body = response.body();
             if (body == null) {
                 return;
@@ -362,11 +423,32 @@ public class DownloadManager {
 
             InputStream is = body.byteStream();
             try {
-                fileOutputStream = new FileOutputStream(file, true);
-                byte[] buffer = new byte[4086];//缓冲数组4kB
+                File file = new File(storePath, downloadInfo.getFileName());
+                if (!file.getParentFile().exists()) {
+                    file.getParentFile().mkdirs();// 能创建多级目录
+                }
+
+                DiskLruCache.Editor editor = null;
+                if (downloadInfo.isUseCache() && DiskCacheManager.INSTANCE().isInitOk()) {
+                    editor = DiskCacheManager.INSTANCE().getEditor(downloadInfo.getCacheKey().getKey());
+                    editor.getEntry().setSuffix(downloadInfo.getType());
+                    outputStream = editor.newOutputStream(0);
+                } else {
+                    fileOutputStream = new FileOutputStream(file, true);
+                }
+
+                byte[] buffer = new byte[4086 * 2];//缓冲数组4kB
                 int len;
+
                 while (!call.isCanceled() && (len = is.read(buffer)) != -1) {
-                    fileOutputStream.write(buffer, 0, len);
+                    if (outputStream != null) {
+                        outputStream.write(buffer, 0, len);
+                    } else {
+                        if (fileOutputStream == null) {
+                            return;
+                        }
+                        fileOutputStream.write(buffer, 0, len);
+                    }
                     downloadLength += len;
                     downloadInfo.setProgress(downloadLength);
                     if (!emitter.isDisposed()) {
@@ -377,20 +459,43 @@ public class DownloadManager {
                         }
                     }
                 }
-                fileOutputStream.flush();
-                downCalls.remove(downloadInfo.getKey());
-                downloadInfo.setDownloadFilePath(file.getAbsolutePath());
+                if (outputStream != null) {
+                    outputStream.flush();
+                }
+                if (editor != null) {
+                    editor.commit();
+                    File cacheFile = editor.getEntry().getCleanFile(0);
+                    downloadInfo.setDownloadFilePath(cacheFile.getAbsolutePath());
+                } else {
+                    downloadInfo.setDownloadFilePath(file.getAbsolutePath());
+                }
 
+                if (fileOutputStream != null) {
+                    fileOutputStream.flush();
+                }
+                downCalls.remove(downloadInfo.getCacheKey());
+                addToMemoryCache(downloadInfo);
+                if (isDebug)
+                    Log.d(TAG, "executeDownload() called 下载完成: downloadInfo = [" + downloadInfo + "]");
+            } catch (Exception e) {
+                if (!emitter.isDisposed()) {
+                    emitter.onError(e);
+                }
+                e.printStackTrace();
             } finally {
                 //关闭IO流
                 CloseUtils.close(is, fileOutputStream);
             }
+
             if (!emitter.isDisposed()) {
                 emitter.onComplete();//完成
             }
         }
     }
 
+    public void setDefStoreDir(String defStoreDir) {
+        this.defStoreDir = defStoreDir;
+    }
 
     /**
      * 获取下载长度
@@ -415,7 +520,7 @@ public class DownloadManager {
             }
         } catch (IOException e) {
             if (callback != null) {
-                callback.onError(e.getMessage());
+                //  callback.onError(e.getMessage());
             }
             e.printStackTrace();
         }

@@ -3,6 +3,7 @@ package com.taike.lib_network.log;
 
 import android.os.Build;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -21,9 +22,12 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okhttp3.internal.http.HttpHeaders;
+import okhttp3.internal.platform.Platform;
 import okio.Buffer;
 import okio.BufferedSource;
 import okio.GzipSource;
+
+import static okhttp3.internal.platform.Platform.INFO;
 
 /**
  * An OkHttp interceptor which logs request and response information. Can be applied as an
@@ -33,7 +37,11 @@ import okio.GzipSource;
  * a stable logging format, use your own interceptor.
  */
 public final class MyHttpLoggingInterceptor implements Interceptor {
+    private static final String TAG = "MyHttpLoggingIntercepto";
     private static final Charset UTF8 = Charset.forName("UTF-8");
+    private static final String REQUEST_MESSAGE_START = "----------->Request:";
+    private static final String RESPONSE_MESSAGE_START = "<-----------Response:";
+    private static final String HEADER_MESSAGE_START = "---------headerInfo---------->:";
 
     public enum Level {
         /**
@@ -93,17 +101,14 @@ public final class MyHttpLoggingInterceptor implements Interceptor {
         BODY
     }
 
-    private final Logger logger;
+    private final HttpLogger logger;
     private LogFilter filter;
 
     private volatile Set<String> careHeaders = new HashSet<>();
     private volatile Level level = Level.NONE;
 
-    public MyHttpLoggingInterceptor() {
-        this(Logger.DEFAULT);
-    }
 
-    public MyHttpLoggingInterceptor(Logger logger) {
+    public MyHttpLoggingInterceptor(HttpLogger logger) {
         this(logger, null);
     }
 
@@ -111,7 +116,7 @@ public final class MyHttpLoggingInterceptor implements Interceptor {
      * @param logger 实现具体的打印逻辑
      * @param filter 对请求参数或响应数据中的敏感信息进行过滤
      */
-    public MyHttpLoggingInterceptor(Logger logger, LogFilter filter) {
+    public MyHttpLoggingInterceptor(HttpLogger logger, LogFilter filter) {
         this.logger = logger;
         this.filter = filter;
     }
@@ -157,27 +162,26 @@ public final class MyHttpLoggingInterceptor implements Interceptor {
         }
         boolean logBody = level == Level.BODY;
         RequestBody requestBody = request.body();
+        String url = request.url().toString();
         boolean logHeaders = logBody || level == Level.HEADERS;
         if (logHeaders) {
             Headers headers = request.headers();
+            Log.d(TAG, "intercept: headers  size=" + headers.size() + "--->" + headers);
             StringBuilder headBuilder = new StringBuilder();
             for (int i = 0, count = headers.size(); i < count; i++) {
                 String name = headers.name(i);
                 if (!"Content-Type".equalsIgnoreCase(name) && !"Content-Length".equalsIgnoreCase(name)) {
                     String part = getLogHeader(headers, i);
-                    if (part != null) {
-                        headBuilder.append(part);
-                        if (i != headers.size() - 1) {
-                            headBuilder.append(",");
-                        }
+                    if (part.length() == 0) {
+                        continue;
+                    }
+                    headBuilder.append(part);
+                    if (i > 1 && i != headers.size() - 1) {
+                        headBuilder.append(",");
                     }
                 }
             }
-            if (headBuilder.length() > 0) {
-                headBuilder.insert(0, "url：" + request.url() + " header:{");
-                headBuilder.insert(headBuilder.length(), "}");
-                logHeader(headBuilder.toString());
-            }
+
             String requestBodyString = "";
             if (requestBody != null) {
                 Buffer buffer = new Buffer();
@@ -192,30 +196,34 @@ public final class MyHttpLoggingInterceptor implements Interceptor {
                 }
             }
 
-            StringBuilder requestMessage = new StringBuilder("-------->>>>>>Request:")
+
+            StringBuilder requestMessage = new StringBuilder(REQUEST_MESSAGE_START)
                     .append(request.method())
                     .append(" url：")
-                    .append(request.url());
+                    .append(url);
+
+            if (headBuilder.length() > 0) {
+                requestMessage.append("\n header:").append(headBuilder.toString());
+            }
 
             if (!TextUtils.isEmpty(requestBodyString)) {
                 if (filter != null) {
-                    requestBodyString = filter.filter(requestBodyString);//过滤
+                    requestBodyString = filter.filter(url, requestBodyString);//过滤
                 }
-                requestMessage.append(" body:").append(requestBodyString);
+                requestMessage.append("\n body:").append(requestBodyString);
             }
-            logger.log(requestMessage.toString());
+            logger.log(request.url().toString(), requestMessage.toString());
         }
 
         Response response;
         try {
             response = chain.proceed(request);
         } catch (Exception e) {
-            logger.log("<-- HTTP FAILED: " + e);
+            logger.log(request.url().toString(), "<-- HTTP FAILED  EXCEPTION: " + e);
             throw e;
         }
 
         long costTime = System.currentTimeMillis() - startNs;
-
         String responseBodyString = "";
         ResponseBody responseBody = response.body();
         if (responseBody == null) {
@@ -232,7 +240,6 @@ public final class MyHttpLoggingInterceptor implements Interceptor {
                     BufferedSource source = responseBody.source();
                     source.request(Long.MAX_VALUE); // Buffer the entire body.
                     Buffer buffer = source.buffer();
-
                     if ("gzip".equalsIgnoreCase(headers.get("Content-Encoding")) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                         try (GzipSource gzippedResponseBody = new GzipSource(buffer.clone())) {
                             buffer = new Buffer();
@@ -247,7 +254,7 @@ public final class MyHttpLoggingInterceptor implements Interceptor {
                     if (contentLength != 0 && charset != null) {
                         responseBodyString = buffer.clone().readString(charset);
                         if (filter != null) {
-                            responseBodyString = filter.filter(responseBodyString);//过滤
+                            responseBodyString = filter.filter(url, responseBodyString);//过滤
                         }
                     }
                 }
@@ -257,36 +264,47 @@ public final class MyHttpLoggingInterceptor implements Interceptor {
         return response;
     }
 
-    void logHeader(String headerInfo) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            Objects.requireNonNull(logger, "logger is cannot be null");
-        }
-        logger.log(headerInfo);
+    void logHeader(String url, String headerInfo) {
+        logger.log(url, HEADER_MESSAGE_START + headerInfo);
     }
 
 
     private void logResponse(Response response, long costTime, String responseBodyString) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            Objects.requireNonNull(logger, "logger is cannot be null");
+        Objects.requireNonNull(logger, "logger is cannot be null");
+        String mediaTypeString;
+        ResponseBody body = response.body();
+        if (body != null) {
+            MediaType mediaType = body.contentType();
+            mediaTypeString = "" + mediaType;
+            if (mediaType != null) {
+                String subType = mediaType.subtype();
+                if (!"json".equals(subType) && !"text".equals(subType) && !"plain".equals(subType) && !"html".equals(subType)) {
+                    responseBodyString = "已忽略该类型日志！";
+                }
+            }
+        } else {
+            mediaTypeString = "unKnown";
         }
-        logger.log("<<<<<<--------Response:" +
-                " costTime:" + costTime +" ms"+
+        String url = response.request().url().toString();
+        logger.log(url, RESPONSE_MESSAGE_START +
+                " costTime:" + costTime + " ms" +
                 " code: " + response.code() +
-                " url: " + response.request().url() +
-                " body: " + (TextUtils.isEmpty(responseBodyString) ? "" : responseBodyString));
+                " url: " + url +
+                " mediaType: " + mediaTypeString +
+                "\n body: " + (TextUtils.isEmpty(responseBodyString) ? "" : responseBodyString));
     }
 
 
     private String getLogHeader(Headers headers, int i) {
         if (!careHeaders.contains(headers.name(i))) {
-            return null;
+            return "";
         }
         return "{" + headers.name(i) + ":" + headers.value(i) + "}";
     }
 
     /**
      * Returns true if the body in question probably contains human readable text. Uses a small sample
-     * of code points to detect unicode control characters commonly used in binary file signatures.
+     * of code points to detect unicode control characters commonly used in binary ffilerle signatures.
      */
     static boolean isPlaintext(Buffer buffer) {
         try {
@@ -314,5 +332,6 @@ public final class MyHttpLoggingInterceptor implements Interceptor {
                 && !contentEncoding.equalsIgnoreCase("identity")
                 && !contentEncoding.equalsIgnoreCase("gzip");
     }
+
 }
 

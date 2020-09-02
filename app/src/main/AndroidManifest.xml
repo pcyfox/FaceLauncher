@@ -20,7 +20,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
-        android:name="ch.arnab.launcher.App"
+        android:name="ch.taike.launcher.App"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
@@ -30,7 +30,7 @@
         tools:ignore="MissingTvBanner">
 
         <activity
-            android:name="ch.arnab.launcher.ui.HomeScreenActivity"
+            android:name="ch.taike.launcher.ui.HomeScreenActivity"
             android:configChanges="orientation|keyboard"
             android:excludeFromRecents="true"
             android:launchMode="singleTask"
@@ -47,13 +47,13 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name="ch.arnab.launcher.receiver.startWhenBootUPReceiver">
+        <receiver android:name="ch.taike.launcher.receiver.startWhenBootUPReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.ACTION_SHUTDOWN" />
             </intent-filter>
         </receiver>
-        <activity android:name="ch.arnab.launcher.ui.CmdActivity" />
+        <activity android:name="ch.taike.launcher.ui.CmdActivity" />
     </application>
 
 </manifest>

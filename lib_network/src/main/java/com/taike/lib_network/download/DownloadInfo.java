@@ -1,7 +1,12 @@
 package com.taike.lib_network.download;
 
 
+import android.text.TextUtils;
+
+import com.taike.lib_network.MD5;
+
 import java.util.Map;
+import java.util.Objects;
 
 public class DownloadInfo {
 
@@ -18,13 +23,18 @@ public class DownloadInfo {
     private Map<String, String> headers; //请求头
     private String url;
     private String fileName;
-    private String downloadFilePath;//下载后文件的保存路径
+    //File file = new File(storePath, downloadInfo.getFileName());
+    private String downloadFilePath;//下载后文件的保存路径。完整的
     private int downloadStatus;
     private long total;
     private long progress;
     //通过post方式请下载，参数是json时使用
     private String jsonParam = "";
-
+    //下载文件所在的根目录
+    private String storeDir = "";
+    private Key cacheKey;
+    private boolean isUseCache;
+    private String type;
 
     public DownloadInfo(String url) {
         this.url = url;
@@ -35,10 +45,22 @@ public class DownloadInfo {
         this.downloadStatus = downloadStatus;
     }
 
-    public Key getKey() {
-        return new Key(url + jsonParam);
+
+    public boolean isUseCache() {
+        return isUseCache;
     }
 
+    public void setUseCache(boolean useCache) {
+        isUseCache = useCache;
+    }
+
+    public Key getCacheKey() {
+        return cacheKey;
+    }
+
+    public void setCacheKey(Key cacheKey) {
+        this.cacheKey = cacheKey;
+    }
 
     public String getJsonParam() {
         return jsonParam;
@@ -62,6 +84,39 @@ public class DownloadInfo {
 
     public String getFileName() {
         return fileName;
+    }
+
+    public String getType() {
+        if (!TextUtils.isEmpty(type)) {
+            return type;
+        }
+        if (!TextUtils.isEmpty(fileName) && fileName.contains(".")) {
+            int index = fileName.indexOf(".");
+            if (index > 0) {
+                return fileName.substring(index + 1);
+            }
+        }
+        return getType(url);
+    }
+
+    public static String getType(String url) {
+        if (!TextUtils.isEmpty(url)) {
+            int index = url.lastIndexOf(".");
+            if (index < 0) {
+                return "";
+            }
+            int indexParam = url.indexOf("?");
+            if (indexParam > 0) {
+                return url.substring(0, indexParam).substring(index + 1);
+            } else {
+                return url.substring(index + 1);
+            }
+        }
+        return "";
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public void setFileName(String fileName) {
@@ -96,6 +151,14 @@ public class DownloadInfo {
         this.url = url;
     }
 
+    public void setStoreDir(String storePath) {
+        this.storeDir = storePath;
+    }
+
+    public String getStoreDir() {
+        return storeDir;
+    }
+
     public String getDownloadFilePath() {
         if (DownloadInfo.DOWNLOAD_OVER != downloadStatus) {
             throw new IllegalStateException("DOWNLOAD_OVER ?");
@@ -110,12 +173,16 @@ public class DownloadInfo {
     @Override
     public String toString() {
         return "DownloadInfo{" +
-                "url='" + url + '\'' +
+                "headers=" + headers +
+                ", url='" + url + '\'' +
                 ", fileName='" + fileName + '\'' +
                 ", downloadFilePath='" + downloadFilePath + '\'' +
-                ", downloadStatus='" + downloadStatus + '\'' +
+                ", downloadStatus=" + downloadStatus +
                 ", total=" + total +
                 ", progress=" + progress +
+                ", jsonParam='" + jsonParam + '\'' +
+                ", storePath='" + storeDir + '\'' +
+                ", cacheKey=" + cacheKey +
                 '}';
     }
 
@@ -123,7 +190,7 @@ public class DownloadInfo {
         private String key;
 
         public Key(String key) {
-            this.key = key;
+            this.key = "" + MD5.getMD5(key);
         }
 
         public String getKey() {
@@ -131,7 +198,27 @@ public class DownloadInfo {
         }
 
         public void setKey(String key) {
-            this.key = key;
+            this.key = "" + MD5.getMD5(key);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Key key1 = (Key) o;
+            return Objects.equals(key, key1.key);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(key);
+        }
+
+        @Override
+        public String toString() {
+            return "Key{" +
+                    "key='" + key + '\'' +
+                    '}';
         }
     }
 

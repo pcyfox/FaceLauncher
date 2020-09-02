@@ -4,9 +4,25 @@ import com.google.gson.annotations.SerializedName;
 
 
 public class PrintLogReq extends BasePrintLogReq {
+    @SerializedName("client_name")
+    private String clientName;
+    @SerializedName("user_id")
+    private String uid;
+    @SerializedName("device_id")
+    private String clientId;
+    @SerializedName("is_debug")//是否为测试版本
+    private boolean isDebug;
+    @SerializedName("server_info")//连接的服务器信息
+    private String serviceType;
+    @SerializedName("app_version_code")
+    private String version;//app 版本号
 
-    public PrintLogReq(String client, String uid, String clientId, boolean isDebug, String serviceType, String version) {
-        this.client = client;
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    public PrintLogReq(String clientName, String uid, String clientId, boolean isDebug, String serviceType, String version) {
+        this.clientName = clientName;
         this.uid = uid;
         this.clientId = clientId;
         this.isDebug = isDebug;
@@ -18,30 +34,6 @@ public class PrintLogReq extends BasePrintLogReq {
         this(client, "", clientId, isDebug, serviceType, version);
     }
 
-    public void setUid(String uid) {
-        this.uid = uid;
-    }
-    @SerializedName("client")
-    private String client;
-    @SerializedName("uid")
-    private String uid;
-    @SerializedName("client_id")
-    private String clientId;
-    @SerializedName("is_debug")//是否为测试版本
-    private boolean isDebug;
-    @SerializedName("service_type")//连接的服务器列席
-    private String serviceType;
-    @SerializedName("version")
-    private String version;//app 版本号
-
-
-    public String getClient() {
-        return client;
-    }
-
-    public void setClient(String client) {
-        this.client = client;
-    }
 
     public String getUid() {
         return uid;
@@ -79,15 +71,11 @@ public class PrintLogReq extends BasePrintLogReq {
         this.version = version;
     }
 
-    @Override
-    public String toString() {
-        return "PrintLogReq{" +
-                "client='" + client + '\'' +
-                ", uid='" + uid + '\'' +
-                ", clientId='" + clientId + '\'' +
-                ", tag='" + tag + '\'' +
-                ", msg='" + msg + '\'' +
-                ", ts='" + ts + '\'' +
-                '}';
+    public String getClientName() {
+        return clientName;
+    }
+
+    public void setClientName(String clientName) {
+        this.clientName = clientName;
     }
 }

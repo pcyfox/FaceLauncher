@@ -23,6 +23,7 @@ import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
+import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.CharsetUtil;
 
 
@@ -37,11 +38,9 @@ public class NettyTcpServer {
 
     private static NettyTcpServer instance = null;
     private NettyServerListener<String> listener;
-    //    private boolean connectStatus;
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
     private volatile boolean isServerStart;
-
     private String packetSeparator;
     private int maxPacketLong = 1024 * 1024 * 3;
 
@@ -89,7 +88,6 @@ public class NettyTcpServer {
                                 public void initChannel(SocketChannel ch) throws Exception {
                                     ch.pipeline().addLast(new StringEncoder(CharsetUtil.UTF_8));
                                     if (!TextUtils.isEmpty(packetSeparator)) {
-//                                        ByteBuf delimiter = Unpooled.copiedBuffer(packetSeparator.getBytes());
                                         ByteBuf delimiter = Unpooled.buffer();
                                         delimiter.writeBytes(packetSeparator.getBytes());
                                         ch.pipeline().addLast(new DelimiterBasedFrameDecoder(maxPacketLong, delimiter));
@@ -98,12 +96,13 @@ public class NettyTcpServer {
                                     }
                                     ch.pipeline().addLast(new StringEncoder(CharsetUtil.UTF_8));
                                     ch.pipeline().addLast(new StringDecoder(CharsetUtil.UTF_8));
-                                    ch.pipeline().addLast( new LengthFieldPrepender(4/*表示数据长度所占的字节数*/));
-                                    // 定义一个发送消息协议格式：|--header:4 byte--|--content:20MB--|
-                                    // ch.pipeline().addLast("framedecoder",new LengthFieldBasedFrameDecoder(1024*1024*2, 0, 4,0,4));
+                                    ch.pipeline().addLast(new IdleStateHandler(20, 20, 30));
+                                    ch.pipeline().addLast(new LengthFieldPrepender(4/*表示数据长度所占的字节数*/));
                                     if (listener != null) {
                                         ch.pipeline().addLast(new EchoServerHandler(listener));
+                                        ch.pipeline().addLast(new TimeoutServerHandler(listener));
                                     }
+
                                 }
                             });
 
@@ -143,13 +142,6 @@ public class NettyTcpServer {
         this.listener = listener;
     }
 
-//    public void setConnectStatus(boolean connectStatus) {
-//        this.connectStatus = connectStatus;
-//    }
-//
-//    public boolean getConnectStatus() {
-//        return connectStatus;
-//    }
 
     public boolean isServerStart() {
         return isServerStart;
@@ -157,7 +149,7 @@ public class NettyTcpServer {
 
 
     // 异步发送消息
-    public boolean sendMsgToChannel(String data, ChannelFutureListener listener,Channel channel) {
+    public boolean sendMsgToChannel(String data, Channel channel, ChannelFutureListener listener) {
         boolean flag = channel != null && channel.isActive();
         String separator = TextUtils.isEmpty(packetSeparator) ? System.getProperty("line.separator") : packetSeparator;
         if (flag) {
@@ -167,12 +159,9 @@ public class NettyTcpServer {
     }
 
     // 同步发送消息
-    public boolean sendMsgToChannel(String data,Channel channel) {
+    public boolean sendMsgToChannel(String data, Channel channel) {
         boolean flag = channel != null && channel.isActive();
         if (flag) {
-//			ByteBuf buf = Unpooled.copiedBuffer(data);
-//            ByteBuf byteBuf = Unpooled.copiedBuffer(data + System.getProperty("line.separator"), //2
-//                    CharsetUtil.UTF_8);
             String separator = TextUtils.isEmpty(packetSeparator) ? System.getProperty("line.separator") : packetSeparator;
             ChannelFuture channelFuture = channel.writeAndFlush(data + separator).awaitUninterruptibly();
             return channelFuture.isSuccess();

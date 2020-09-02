@@ -74,7 +74,6 @@ public class IPutils {
         if (mobileNetworkInfo != null) {
             if (mobileNetworkInfo.isConnected()) {
                 ip = getlocalIp();
-                Log.i("IPutils", "本地ip-----" + ip);
             }
         }
         if (wifiNetworkInfo != null) {
@@ -83,7 +82,6 @@ public class IPutils {
                 WifiInfo wifiInfo = wifiManager.getConnectionInfo();
                 int ipAddress = wifiInfo.getIpAddress();
                 ip = intToIp(ipAddress);
-                Log.i("IPutils", "wifi_ip地址为------" + ip);
             }
         }
         return ip;

@@ -10,6 +10,7 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.elvishew.xlog.LogLevel;
 import com.elvishew.xlog.XLog;
 
 import java.io.File;
@@ -26,13 +27,14 @@ import java.util.TimeZone;
 
 
 public class CrashHandlerUtils implements UncaughtExceptionHandler {
+    public static final int CRASH_LOG_LEVEL = LogLevel.NONE;
     private static final String TAG = "CrashHandler";
     private Context mContext;
-
-    private static final String SDCARD_ROOT =   Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString();
+    private static final String SDCARD_ROOT = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString();
     private static CrashHandlerUtils mInstance = new CrashHandlerUtils();
 
     private CrashHandlerUtils() {
+
     }
 
     /**
@@ -49,14 +51,13 @@ public class CrashHandlerUtils implements UncaughtExceptionHandler {
      */
     @Override
     public void uncaughtException(Thread thread, Throwable ex) {
-        XLog.e(ex.getLocalizedMessage());
         ex.printStackTrace();
         // 将一些信息保存到SDcard中
         savaInfoToSD(mContext, ex);
         // 提示用户程序即将退出
         showToast(mContext, "很抱歉，程序遭遇异常，即将退出！");
         try {
-            Thread.sleep(2000);
+            Thread.sleep(2500);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -66,7 +67,7 @@ public class CrashHandlerUtils implements UncaughtExceptionHandler {
     /**
      * 为我们的应用程序设置自定义Crash处理
      */
-    public void setCustomCrashHandler(Context context) {
+    public void init(Context context) {
         mContext = context;
         Thread.setDefaultUncaughtExceptionHandler(this);
     }
@@ -105,18 +106,19 @@ public class CrashHandlerUtils implements UncaughtExceptionHandler {
             e.printStackTrace();
         }
         if (mPackageInfo == null) return map;
-        map.put("versionName", "" + mPackageInfo.versionName);
-        map.put("versionCode", "" + mPackageInfo.versionCode);
-        map.put("时间：", "" + formatTime(System.currentTimeMillis()));
-        map.put("型号", "" + Build.MODEL);
-        map.put("SDK_INT", "" + Build.VERSION.SDK_INT);
-        map.put("PRODUCT", "" + Build.PRODUCT);
+        map.put("appCrash", "**---------------------------------Crash-----------------------------------**");
+        map.put("versionName ", "" + mPackageInfo.versionName);
+        map.put("versionCode ", "" + mPackageInfo.versionCode);
+        map.put("crashTime ", "" + formatTime(System.currentTimeMillis()));
+        map.put("型号 ", "" + Build.MODEL);
+        map.put("SDK_INT ", "" + Build.VERSION.SDK_INT);
+        map.put("PRODUCT ", "" + Build.PRODUCT);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            map.put("支持的CPU架构", "" + Arrays.toString(Build.SUPPORTED_ABIS));
+            map.put("支持的CPU架构 ", "" + Arrays.toString(Build.SUPPORTED_ABIS));
         }
-        map.put("手机制造商", "" + Build.MANUFACTURER);
-        map.put("BRAND", "" + Build.BRAND);
-        map.put("HARDWARE", "" + Build.HARDWARE);
+        map.put("手机制造商 ", "" + Build.MANUFACTURER);
+        map.put("BRAND ", "" + Build.BRAND);
+        map.put("HARDWARE ", "" + Build.HARDWARE);
         return map;
     }
 
@@ -131,23 +133,21 @@ public class CrashHandlerUtils implements UncaughtExceptionHandler {
         PrintWriter mPrintWriter = new PrintWriter(mStringWriter);
         throwable.printStackTrace(mPrintWriter);
         mPrintWriter.close();
-        Log.e(TAG, mStringWriter.toString());
+        //  Log.e(TAG, mStringWriter.toString());
         return mStringWriter.toString();
     }
 
 
-    private String savaInfoToSD(Context context, Throwable ex) {
+    public String savaInfoToSD(Context context, Throwable ex) {
         String fileName = null;
-        StringBuffer sb = new StringBuffer();
-
+        StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, String> entry : obtainSimpleInfo(context).entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
-            sb.append(key).append(" = ").append(value).append("\n");
+            sb.append(key).append("=").append(value).append("\n   Exception: ");
         }
-
         sb.append(obtainExceptionInfo(ex));
-
+        XLog.log(CRASH_LOG_LEVEL, sb.toString());
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             File dir = new File(SDCARD_ROOT + File.separator + context.getPackageName() + ".crash" + File.separator);
             if (!dir.exists()) {

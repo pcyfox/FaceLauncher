@@ -18,7 +18,7 @@
 
     <fragment
         android:id="@+id/apps_grid"
-        android:name="ch.arnab.launcher.ui.AppsGridFragment"
+        android:name="ch.taike.launcher.ui.AppsGridFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
