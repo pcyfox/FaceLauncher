@@ -162,20 +162,23 @@ public class CloudLogPrinter implements Printer {
                 addLog(tag, msg);
                 return;
             }
+            int size = mLogs.size();
+            Log.d(TAG, "upload log:-----------------> 日志已满，开始打包上传  size:" + size);
 
-            Log.i(TAG, "upload log:-----------------> 日志已满，开始打包上传  size:" + mLogs.size());
             try {
+                List<String> temp = new ArrayList<>();
                 final StringBuilder reqContent = new StringBuilder();
-                for (int i = 0; i < mLogs.size(); i++) {
-                    if (quantityInterval - 1 == i) {
+                for (int i = 0; i < size - 1; i++) {
+                    if (i == quantityInterval) {
                         break;
                     }
                     String log = mLogs.get(i);
-                    mLogs.remove(log);
                     reqContent.append(log);
+                    temp.add(mLogs.get(i));
                 }
-                handleUpdate(reqContent.toString(), cacheKey);
+                mLogs.removeAll(temp);
                 Log.d(TAG, "upload log:-----------------> 日志已处理,还剩size:" + mLogs.size());
+                handleUpdate(reqContent.toString(), cacheKey);
             } catch (Exception e) {
                 e.printStackTrace();
             }
