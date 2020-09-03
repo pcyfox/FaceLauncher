@@ -2,6 +2,7 @@ package ch.taike.launcher;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.text.TextUtils;
@@ -9,6 +10,7 @@ import android.util.Log;
 
 import com.blankj.utilcode.util.AppUtils;
 import com.blankj.utilcode.util.GsonUtils;
+import com.blankj.utilcode.util.ScreenUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.elvishew.xlog.XLog;
 import com.jeremyliao.liveeventbus.LiveEventBus;
@@ -19,6 +21,7 @@ import com.tk.launcher.BuildConfig;
 
 import java.io.File;
 import java.util.List;
+import java.util.Objects;
 
 import ch.taike.launcher.constant.ConstantData;
 import ch.taike.launcher.entity.Action;
@@ -33,6 +36,7 @@ public class SocketMsgHandler {
     private Context context;
     private Handler worker;
     private static final SocketMsgHandler instance = new SocketMsgHandler();
+    private Rect windowRect = new Rect(0, 0, 0, -200);
 
     private SocketMsgHandler() {
     }
@@ -104,6 +108,12 @@ public class SocketMsgHandler {
                             break;
                         case SHOW_ALL_APPS:
                             LiveEventBus.get().with(action.name(), String.class).post(data);
+                            break;
+                        case SHOW_TOP_STATUS_BAR:
+                            isShowTopStatusBar(Objects.equals(data, "1") || Objects.equals(data, "true"));
+                            break;
+                        case SHOW_BOTTOM_NAVIGATION_BAR:
+                            isShowBottomNavigationBar(Objects.equals(data, "1") || Objects.equals(data, "true"));
                             break;
                     }
                 }
@@ -247,6 +257,28 @@ public class SocketMsgHandler {
             return;
         }
         RootUtils.killApp(pkgName);
+    }
+
+
+    private void isShowBottomNavigationBar(boolean isShow) {
+        if (isShow) {
+            windowRect.bottom = 0;
+        } else {
+            windowRect.bottom = -200;
+        }
+
+        RootUtils.wmOverscan(windowRect);
+    }
+
+
+    private void isShowTopStatusBar(boolean isShow) {
+        if (isShow) {
+            windowRect.top = 0;
+        } else {
+            windowRect.top = -200;
+        }
+
+        RootUtils.wmOverscan(windowRect);
     }
 
 

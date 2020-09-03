@@ -164,11 +164,10 @@ public class CloudLogPrinter implements Printer {
             }
             int size = mLogs.size();
             Log.d(TAG, "upload log:-----------------> 日志已满，开始打包上传  size:" + size);
-
             try {
                 List<String> temp = new ArrayList<>();
                 final StringBuilder reqContent = new StringBuilder();
-                for (int i = 0; i < size - 1; i++) {
+                for (int i = 0; i < size; i++) {
                     if (i == quantityInterval) {
                         break;
                     }
@@ -216,9 +215,9 @@ public class CloudLogPrinter implements Printer {
             } else {
                 tooFastCount = 0;
             }
-            if (tooFastCount >= 10) {
+            if (tooFastCount >= 50) {
                 //TODO:代码极有可能出现问题
-                String tip = " addLog() called with:isTooFast 日志上传暂停！";
+                String tip = " addLog() called with:添加日志过快，日志将被丢弃！";
                 if (tooFastCount % 1008 == 0) {
                     XLog.e(TAG + tip);
                 } else {
@@ -228,7 +227,7 @@ public class CloudLogPrinter implements Printer {
 
             if (!isTooFast) {
                 if (mLogs.size() >= 50) {//避免一直添加，撑爆内存
-                    Log.e(TAG, "addLog() called with: mLogs.size() >= 30");
+                    Log.e(TAG, "addLog() 添加日志达到上线，丢掉最早的一条日式");
                     mLogs.remove(0);
                 }
                 mLogs.add(createLog(tag, msg));

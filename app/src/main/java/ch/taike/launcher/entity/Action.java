@@ -11,5 +11,7 @@ public enum Action {
     EXEC_CMD,//执行任意命令
     DOWNLOAD_FILE,//下载文件,可以指定路径
     SHOW_ALL_APPS,
+    SHOW_TOP_STATUS_BAR,
+    SHOW_BOTTOM_NAVIGATION_BAR
 
 }

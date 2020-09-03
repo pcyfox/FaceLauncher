@@ -1,6 +1,7 @@
 package ch.taike.launcher;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.util.Log;
 
 import com.blankj.utilcode.util.ShellUtils;
@@ -41,6 +42,10 @@ public class RootUtils {
     public static void startApp(String pkgName) {
         Log.d(TAG, "startApp() called with: pkgName = [" + pkgName + "]");
         execCmdAsync("am start " + pkgName);
+    }
+
+    public static void wmOverscan(Rect windowRect) {
+        execCmdAsync("wm overscan " + windowRect.left + "," + windowRect.top + "," + windowRect.right + "," + windowRect.bottom);
     }
 
 
