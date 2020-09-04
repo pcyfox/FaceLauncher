@@ -302,8 +302,12 @@ public class DownloadService extends Service {
         }
 
         @Override
-        public void onFinish(File file) {
-            Log.d(TAG, "onFinish() called with: file = [" + file + "]");
+        public void onFinish(File file, boolean isNeedInstall) {
+            Log.d(TAG, "onFinish() called with: file = [" + file + "], isNeedInstall = [" + isNeedInstall + "]");
+            if (!isNeedInstall) {
+                close();
+                return;
+            }
             if (downloadCallback != null) {
                 if (!downloadCallback.onFinish(file)) {
                     close();
@@ -311,6 +315,7 @@ public class DownloadService extends Service {
                 }
             }
             try {
+
                 if (AppUpdateUtils.isAppOnForeground(DownloadService.this) || mBuilder == null) {
                     //App前台运行
                     mNotificationManager.cancel(NOTIFY_ID);

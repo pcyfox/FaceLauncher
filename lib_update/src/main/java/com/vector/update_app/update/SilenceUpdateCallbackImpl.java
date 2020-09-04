@@ -49,7 +49,7 @@ public class SilenceUpdateCallbackImpl extends NormalUpdateCallbackImpl {
                 @Override
                 public boolean onFinish(File file) {
                     showDialog(updateApp, updateAppManager, file);
-                    return false;
+                    return true;
                 }
 
 

@@ -26,6 +26,10 @@ public class RootUtils {
         execCmdAsync("pm install -i " + context.getPackageName() + " --user 0 " + apkPath);
     }
 
+    public static void installAPK(String apkPath, Utils.Callback<ShellUtils.CommandResult> callback) {
+        execCmdAsync(" install -r " + apkPath, callback);
+    }
+
     public static void uninstallAPK(String packName) {
         execCmdAsync("pm uninstall " + packName);
     }
@@ -36,12 +40,12 @@ public class RootUtils {
 
 
     public static void killApp(String pkgName) {
-        Log.d(TAG, "killApp() called with: pkgName = [" + pkgName + "]");
+        XLog.d(TAG + ":killApp() called with: pkgName = [" + pkgName + "]");
         execCmdAsync("am force-stop  " + pkgName);
     }
 
     public static void startApp(String pkgName) {
-        Log.d(TAG, "startApp() called with: pkgName = [" + pkgName + "]");
+        XLog.d(TAG + ":startApp() called with: pkgName = [" + pkgName + "]");
         execCmdAsync("am start " + pkgName);
     }
 
@@ -55,10 +59,18 @@ public class RootUtils {
             @Override
             public void onCall(ShellUtils.CommandResult data) {
                 XLog.i(TAG + ":adb execCmdAsync called with:cmd=" + cmd + ",result= [" + data + "]");
-                if(data!=null){
-                    ToastUtils.showShort(data.toString());
+                if (data != null) {
+                    if (data.result == 0) {
+                        ToastUtils.showShort("操作成功！");
+                    } else {
+                        ToastUtils.showLong("操作失败：" + data.toString());
+                    }
                 }
             }
         });
+    }
+
+    public static void execCmdAsync(String cmd, Utils.Callback<ShellUtils.CommandResult> callback) {
+        ShellUtils.execCmdAsync(cmd, true, callback);
     }
 }

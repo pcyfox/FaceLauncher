@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Comparator;
 
+import ch.taike.launcher.entity.AppModel;
 import ch.taike.launcher.receiver.PackageIntentReceiver;
 
 /**

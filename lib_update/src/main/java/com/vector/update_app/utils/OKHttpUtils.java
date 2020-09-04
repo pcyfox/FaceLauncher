@@ -1,6 +1,8 @@
 package com.vector.update_app.utils;
 
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -29,7 +31,7 @@ import okhttp3.ResponseBody;
 public class OKHttpUtils {
     private static OkHttpClient okHttpClient;
     private final static MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-
+    private static final String TAG = "OKHttpUtils";
     public static void get(@NonNull String url, @NonNull Callback callback) {
         final OkHttpClient client = new OkHttpClient();
         try {
@@ -158,6 +160,7 @@ public class OKHttpUtils {
 
 
     public static void post(@NonNull OkHttpClient client, @NonNull String url, @NonNull String jsonData, Map<String, String> header, @NonNull Callback callback) {
+        Log.d(TAG, "post() called with: client = [" + client + "], url = [" + url + "], jsonData = [" + jsonData + "], header = [" + header + "], callback = [" + callback + "]");
         RequestBody requestBody = RequestBody.create(JSON, jsonData);
         Request.Builder builder = new Request.Builder().url(url).post(requestBody);
         if (header != null) {

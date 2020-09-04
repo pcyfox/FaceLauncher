@@ -9,7 +9,7 @@ import androidx.loader.content.Loader;
 import java.util.ArrayList;
 
 import ch.taike.launcher.AppListAdapter;
-import ch.taike.launcher.AppModel;
+import ch.taike.launcher.entity.AppModel;
 import ch.taike.launcher.AppsLoader;
 import ch.taike.launcher.filter.AppModelFilter;
 import ch.taike.launcher.filter.AppModelFilterImpl;

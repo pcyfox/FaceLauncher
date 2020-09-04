@@ -146,9 +146,10 @@ public class UpdateAppManager {
                 versionName = versionName.substring(0, versionName.lastIndexOf('-'));
             }
             if (!TextUtils.isEmpty(versionName)) {
-                params.put("packageName", versionName);
+                params.put("versionName", versionName);
             }
-            params.put("packageCode", "" + AppUpdateUtils.getVersionCode(getContext()));
+            params.put("versionCode", "" + AppUpdateUtils.getVersionCode(getContext()));
+            params.put("packageName", "" + getContext().getPackageName());
             params.put("manufacturer", Build.MANUFACTURER);
             params.put("sdk_version", "" + Build.VERSION.SDK_INT);
             params.put("product", Build.PRODUCT);

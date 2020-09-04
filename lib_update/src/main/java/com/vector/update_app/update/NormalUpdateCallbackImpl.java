@@ -52,20 +52,20 @@ public class NormalUpdateCallbackImpl implements UpdateCallback {
                 return null;
             }
             JSONObject data = jsonObject.getJSONObject("data");
+
             if (data == null) {
                 return new UpdateAppBean();
             }
             updateAppBean
-                    .setUpdate(data.optBoolean("is_update"))
+                    .setUpdate(true)
                     .setOriginRes(json)
-                    .setNewVersion(data.optString("new_version"))
-                    .setIgnored(data.optBoolean("ignored"))
-                    .setApkFileUrl(data.optString("apk_file_url"))
-                    .setTargetSize(data.optString("target_size"))
-                    .setUpdateLog(data.optString("update_log"))
-                    .setNewMd5(data.optString("new_md5"))
-                    .setCanIgnoreVersion(data.getBoolean("is_can_ignore_version"))
-                    .setConstraint(data.optBoolean("constraint"))
+                    .setNewVersion(data.optString("versionName"))
+                    .setApkFileUrl(data.optString("apkUrl"))
+                    .setTargetSize(data.optString("apkSize"))
+                    .setUpdateLog(data.optString("description"))
+                    .setNewMd5(data.optString("md5Code"))
+                    .setCanIgnoreVersion(data.optInt("forceStatus") == 0)
+                    .setConstraint(false)
                     .setDismissNotification(true);//隐藏通知栏;
             if (updateAppBean.isConstraint()) {//强制升级
                 // 避免强制升级影响测试版本正常使用

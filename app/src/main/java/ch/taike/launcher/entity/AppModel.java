@@ -1,4 +1,4 @@
-package ch.taike.launcher;
+package ch.taike.launcher.entity;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -65,7 +65,7 @@ public class AppModel {
     }
 
 
-    void loadLabel(Context context) {
+    public void loadLabel(Context context) {
         if (mAppLabel == null || !mMounted) {
             if (!mApkFile.exists()) {
                 mMounted = false;

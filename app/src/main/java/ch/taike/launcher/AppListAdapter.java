@@ -17,6 +17,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.List;
 
+import ch.taike.launcher.entity.AppModel;
+
 /**
  * Created by Arnab Chakraborty
  */

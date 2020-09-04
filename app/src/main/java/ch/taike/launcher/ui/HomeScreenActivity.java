@@ -28,7 +28,7 @@ import com.tk.launcher.R;
 import com.vector.update_app.update.UpdateHelper;
 
 import ch.taike.launcher.App;
-import ch.taike.launcher.SocketMsgHandler;
+import ch.taike.launcher.manager.SocketMsgHandler;
 import ch.taike.launcher.update.UpdateAppManagerUtils;
 
 public class HomeScreenActivity extends FragmentActivity {

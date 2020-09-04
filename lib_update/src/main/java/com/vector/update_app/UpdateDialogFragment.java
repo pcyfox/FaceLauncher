@@ -134,7 +134,9 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
         dialogWindow.setGravity(Gravity.CENTER);
         WindowManager.LayoutParams lp = dialogWindow.getAttributes();
         DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
-        lp.height = (int) (displayMetrics.heightPixels * 0.8f);
+
+        lp.height = (int) (displayMetrics.heightPixels * 0.9f);
+        lp.width = (int) (displayMetrics.widthPixels * 0.25f);
         dialogWindow.setAttributes(lp);
 
         if (mUpdateDialogFragmentListener != null) {
@@ -217,7 +219,7 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
 
             String msg = "";
             if (!TextUtils.isEmpty(targetSize)) {
-                msg = "新版本大小：" + targetSize + "\n";
+                msg = "新版本大小：" + targetSize + "MB\n\n";
             }
 
             if (!TextUtils.isEmpty(updateLog)) {
@@ -423,19 +425,29 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
         binder.start(mUpdateApp, new DownloadCallback() {
             @Override
             public void onStart() {
-                if (!UpdateDialogFragment.this.isRemoving()) {
-                    mNumberProgressBar.setVisibility(View.VISIBLE);
-                    mUpdateOkButton.setVisibility(View.GONE);
-                    mIgnore.setVisibility(View.GONE);
-                }
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!UpdateDialogFragment.this.isRemoving()) {
+                            mNumberProgressBar.setVisibility(View.VISIBLE);
+                            mUpdateOkButton.setVisibility(View.GONE);
+                            mIgnore.setVisibility(View.GONE);
+                        }
+                    }
+                });
             }
 
             @Override
-            public void onProgress(float progress, long totalSize) {
-                if (!UpdateDialogFragment.this.isRemoving()) {
-                    mNumberProgressBar.setProgress(Math.round(progress / totalSize * 100));
-                    mNumberProgressBar.setMax(100);
-                }
+            public void onProgress(final float progress, final long totalSize) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!UpdateDialogFragment.this.isRemoving()) {
+                            mNumberProgressBar.setProgress(Math.round(progress / totalSize * 100));
+                            mNumberProgressBar.setMax(100);
+                        }
+                    }
+                });
             }
 
             @Override
@@ -445,13 +457,18 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
 
             @Override
             public boolean onFinish(final File file) {
-                if (!UpdateDialogFragment.this.isRemoving()) {
-                    if (mUpdateApp.isConstraint()) {
-                        showInstallBtn(file);
-                    } else {
-                        dismissAllowingStateLoss();
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!UpdateDialogFragment.this.isRemoving()) {
+                            if (mUpdateApp.isConstraint()) {
+                                showInstallBtn(file);
+                            } else {
+                                dismissAllowingStateLoss();
+                            }
+                        }
                     }
-                }
+                });
                 //一般返回 true ，当返回 false 时，则下载，不安装，为静默安装使用。
                 return true;
             }

@@ -22,6 +22,7 @@ public final class UpdateHelper {
     private UpdateHelper() {
         httpManager = new HttpManagerImpl();
         builder = new UpdateAppManager.Builder();
+
     }
 
     public static UpdateHelper getInstance() {
@@ -52,6 +53,7 @@ public final class UpdateHelper {
      * @param isCheckUpdateByUser 是否为用户手动触发升级，此时会不管之前是否已经忽略过该版本
      */
     public void checkUpdate(Activity activity, final boolean isCheckUpdateByUser, String url, ApkDownLoadManager apkDownLoadManager) {
+        SettingStorage.get().init(activity);
         builder.setDownLoadManager(apkDownLoadManager)
                 .setHttpManager(httpManager)
                 .setActivity(activity)
@@ -64,7 +66,7 @@ public final class UpdateHelper {
                     public void onUpdateNotifyDialogOnStart(UpdateAppBean updateApp) {
                         if (!isCheckUpdateByUser) {
                             SettingStorage.get().write(UPDATE_DIALOG_SHOWN_TIMES, getTimes() + 1);
-                            SettingStorage.get().write(REQUEST_PARAM, builder.getRequestParams().toString());
+                            SettingStorage.get().write(REQUEST_PARAM, ""+builder.getRequestParams());
                         }
                     }
 

@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ch.taike.launcher.AppListAdapter;
-import ch.taike.launcher.AppModel;
+import ch.taike.launcher.entity.AppModel;
 import ch.taike.launcher.AppsLoader;
 import ch.taike.launcher.entity.Action;
 import ch.taike.launcher.filter.AppModelFilter;

@@ -34,7 +34,7 @@ public interface ApkDownLoadManager extends Serializable {
 
         void onError(String error);
 
-        void onFinish(File file);
+        void  onFinish(File file,boolean isNeedInstall);
 
         void onStart();
 

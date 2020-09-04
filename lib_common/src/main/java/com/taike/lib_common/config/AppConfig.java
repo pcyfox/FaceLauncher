@@ -2,6 +2,7 @@ package com.taike.lib_common.config;
 
 import android.text.TextUtils;
 
+import com.blankj.utilcode.util.SPStaticUtils;
 import com.taike.lib_common.BuildConfig;
 import com.taike.lib_common.manager.PathManager;
 
@@ -12,7 +13,10 @@ public final class AppConfig {
     private static String baseUrl;
     public static final String NET_CAMERA_ACCOUNT = "admin";
     public static final String NET_CAMERA_PSD = "123456";
-
+    public static String getBaseUrl() {
+        if (BuildConfig.DEBUG) return BuildConfig.DEBUG_URL;
+        return BuildConfig.BASE_URL;
+    }
 
     public static String getNetCameraRTSPSubUrl(String host) {
         if (TextUtils.isEmpty(host)) {
@@ -35,6 +39,17 @@ public final class AppConfig {
         } else {
             return BuildConfig.BASE_URL + "equipment-service/equipmentApk/findNewApk";
         }
+    }
+
+    public static String getDownloadBaseUrl() {
+        return getBaseUrl() + "video-service/oss/downFile";
+    }
+
+    public static String getDownloadUrl(String path) {
+        if (TextUtils.isEmpty(path)) {
+            return "";
+        }
+        return getDownloadBaseUrl() + "?url=" + path;
     }
 
 

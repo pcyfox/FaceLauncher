@@ -1,4 +1,4 @@
-package ch.taike.launcher;
+package ch.taike.launcher.manager;
 
 import android.content.Context;
 import android.content.Intent;
@@ -23,8 +23,10 @@ import java.io.File;
 import java.util.List;
 import java.util.Objects;
 
+import ch.taike.launcher.RootUtils;
 import ch.taike.launcher.constant.ConstantData;
 import ch.taike.launcher.entity.Action;
+import ch.taike.launcher.entity.AppModel;
 import ch.taike.launcher.entity.LauncherMessage;
 
 import static ch.taike.launcher.constant.ConstantData.BROADCAST_ACTION_DISC;

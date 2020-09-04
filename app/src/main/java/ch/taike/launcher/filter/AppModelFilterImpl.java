@@ -3,7 +3,7 @@ package ch.taike.launcher.filter;
 import java.util.ArrayList;
 import java.util.List;
 
-import ch.taike.launcher.AppModel;
+import ch.taike.launcher.entity.AppModel;
 import ch.taike.launcher.constant.ConstantData;
 
 public class AppModelFilterImpl implements AppModelFilter {

@@ -33,6 +33,7 @@ public final class TrdServiceManager {
 
         CloudLogPrinter cloudLogPrinter = CloudLogPrinter.getInstance();
         cloudLogPrinter.init(printLogReq, ELKUrl, clientName);
+        cloudLogPrinter.setQuantityInterval(5);
         XLogHelper.initLog(cloudLogPrinter, AppConfig.getLogPath(), clientName, clientName);
     }
 
