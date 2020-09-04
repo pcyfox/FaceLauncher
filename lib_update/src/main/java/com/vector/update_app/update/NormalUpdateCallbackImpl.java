@@ -3,6 +3,7 @@ package com.vector.update_app.update;
 import android.util.Log;
 
 import com.vector.update_app.BuildConfig;
+import com.vector.update_app.R;
 import com.vector.update_app.UpdateAppBean;
 import com.vector.update_app.UpdateAppManager;
 import com.vector.update_app.interf.UpdateCallback;
@@ -72,11 +73,11 @@ public class NormalUpdateCallbackImpl implements UpdateCallback {
                 if (BuildConfig.DEBUG) {
                     updateAppBean.setConstraint(false);
                 }
-                //  updateAppBean.setDialogTopBg(R.drawable.ic_update_app_top_bg_constraint);
+                updateAppBean.setDialogTopBg(R.drawable.ic_update_app_top_bg_constraint);
             } else if (updateAppBean.isCanIgnoreVersion()) {
-                // updateAppBean.setDialogTopBg(R.drawable.ic_update_app_top_bg_can_ignore);
+                updateAppBean.setDialogTopBg(R.drawable.ic_update_app_top_bg_can_ignore);
             } else {
-                // updateAppBean.setDialogTopBg(R.drawable.ic_update_app_top_bg_normal);
+                updateAppBean.setDialogTopBg(R.drawable.ic_update_app_top_bg_normal);
             }
         } catch (Exception e) {
             e.printStackTrace();
