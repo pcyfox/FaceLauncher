@@ -1,7 +1,7 @@
 ext {
     // Retrofit的正式环境BaseUrl
-    releaseBaseUrl = ""
-    debugBaseUrl = ""
+    releaseBaseUrl = "http://www.taike-cloud.com:8080/"
+    debugBaseUrl = "http://192.168.8.95/"
     ELKBaseUrl = "http://39.103.152.117"
 
     TeachAppVersionCode = 1

@@ -1,10 +1,11 @@
-package com.ff.module_update.impl;
+package ch.taike.launcher.update;
 
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import com.taike.lib_network.download.DownLoadCallback;
+import com.taike.lib_network.download.DownloadInfo;
 import com.taike.lib_network.download.DownloadManager;
 import com.vector.update_app.interf.ApkDownLoadManager;
 
@@ -48,13 +49,12 @@ public class DefDownLoadManagerImpl implements ApkDownLoadManager {
 
     @Override
     public void pauseDownLoad(@NonNull String url) {
-        DownloadManager.getInstance().pauseDownload(url);
-
+        DownloadManager.getInstance().pauseDownload(new DownloadInfo.Key(url));
     }
 
     @Override
     public void cancelDownLoad(@NonNull String url) {
-        DownloadManager.getInstance().cancelDownload(url);
+        DownloadManager.getInstance().cancelDownload(new DownloadInfo.Key(url));
     }
 
 }

@@ -1,10 +1,12 @@
-package com.ff.module_update.impl;
+package ch.taike.launcher.update;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
-import com.ff.module_update.utils.OKHttpUtils;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.blankj.utilcode.util.GsonUtils;
 import com.vector.update_app.interf.HttpManager;
+import com.vector.update_app.utils.OKHttpUtils;
 
 import java.io.IOException;
 import java.util.Map;
@@ -27,7 +29,6 @@ public class DefHttpManagerImpl implements HttpManager {
      */
     @Override
     public void asyncGet(@NonNull String url, @NonNull Map<String, String> params, @Nullable Map<String, String> header, @Nullable final HttpCallback callBack) {
-
         OKHttpUtils.get(url, new okhttp3.Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -49,8 +50,8 @@ public class DefHttpManagerImpl implements HttpManager {
      * @param callBack 回调
      */
     @Override
-    public void asyncPost(@NonNull String url, @Nullable Map<String, String> params,@Nullable Map<String, String> header, @Nullable final HttpCallback callBack) {
-        OKHttpUtils.post(url, params,header, new okhttp3.Callback() {
+    public void asyncPost(@NonNull String url, @Nullable Map<String, String> params, @Nullable Map<String, String> header, @Nullable final HttpCallback callBack) {
+        OKHttpUtils.post(url, GsonUtils.toJson(params),header, new okhttp3.Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 callBack.onError(e.getMessage());

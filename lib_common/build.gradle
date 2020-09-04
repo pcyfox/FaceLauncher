@@ -15,6 +15,7 @@ android {
         buildConfigField("String", "BASE_URL", String.format("\"%s\"", project.releaseBaseUrl.toString()))
         buildConfigField("String", "DEBUG_URL", String.format("\"%s\"", project.debugBaseUrl.toString()))
         buildConfigField("String", "ELK_URL", String.format("\"%s\"", (project.ELKBaseUrl).toString()))
+        buildConfigField("boolean", "IS_DEVELOPER_MODE", "" + getProperty("isDeveloperMode"))
     }
 
     dataBinding {

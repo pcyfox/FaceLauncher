@@ -2,6 +2,7 @@ package com.taike.lib_common.config;
 
 import android.text.TextUtils;
 
+import com.taike.lib_common.BuildConfig;
 import com.taike.lib_common.manager.PathManager;
 
 public final class AppConfig {
@@ -11,8 +12,6 @@ public final class AppConfig {
     private static String baseUrl;
     public static final String NET_CAMERA_ACCOUNT = "admin";
     public static final String NET_CAMERA_PSD = "123456";
-    public static final int NET_CAMERA_PORT = 8091;
-    public static final String KEY_BASE_URL = "KEY_BASE_URL";
 
 
     public static String getNetCameraRTSPSubUrl(String host) {
@@ -28,6 +27,16 @@ public final class AppConfig {
         }
         return "rtsp://" + NET_CAMERA_ACCOUNT + ":" + NET_CAMERA_PSD + "@" + host + "/mpeg4";
     }
+
+
+    public static String getCheckUpDateUrl() {
+        if (BuildConfig.DEBUG) {
+            return BuildConfig.DEBUG_URL + "equipment-service/equipmentApk/findNewApk";
+        } else {
+            return BuildConfig.BASE_URL + "equipment-service/equipmentApk/findNewApk";
+        }
+    }
+
 
     /**
      * 下载文件统一存放地

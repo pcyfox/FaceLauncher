@@ -9,8 +9,8 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.blankj.utilcode.util.AppUtils;
+import com.blankj.utilcode.util.BarUtils;
 import com.blankj.utilcode.util.GsonUtils;
-import com.blankj.utilcode.util.ScreenUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.elvishew.xlog.XLog;
 import com.jeremyliao.liveeventbus.LiveEventBus;
@@ -36,7 +36,9 @@ public class SocketMsgHandler {
     private Context context;
     private Handler worker;
     private static final SocketMsgHandler instance = new SocketMsgHandler();
-    private Rect windowRect = new Rect(0, 0, 0, -200);
+    private Rect windowRect = new Rect(0, 0, 0, 0);
+    private int bottom;
+    private int top;
 
     private SocketMsgHandler() {
     }
@@ -50,6 +52,8 @@ public class SocketMsgHandler {
         this.appModelGetter = appModelGetter;
         this.context = context;
         initWorker();
+        bottom = BarUtils.getNavBarHeight();
+        top = BarUtils.getStatusBarHeight();
         worker.post(() -> {
             RootUtils.grantRoot(context.getApplicationContext());
             initUDP();
@@ -61,6 +65,7 @@ public class SocketMsgHandler {
         HandlerThread handlerThread = new HandlerThread("worker");
         handlerThread.start();
         worker = new Handler(handlerThread.getLooper());
+
     }
 
     private void handleMsg(final String msg) {
@@ -264,7 +269,7 @@ public class SocketMsgHandler {
         if (isShow) {
             windowRect.bottom = 0;
         } else {
-            windowRect.bottom = -200;
+            windowRect.bottom = -bottom;
         }
 
         RootUtils.wmOverscan(windowRect);
@@ -275,9 +280,8 @@ public class SocketMsgHandler {
         if (isShow) {
             windowRect.top = 0;
         } else {
-            windowRect.top = -200;
+            windowRect.top = -top;
         }
-
         RootUtils.wmOverscan(windowRect);
     }
 

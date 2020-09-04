@@ -1,8 +1,8 @@
-package com.ff.module_update.utils;
+package ch.taike.launcher.update;
 
-import com.ff.module_update.impl.DefDownLoadManagerImpl;
-import com.ff.module_update.impl.DefHttpManagerImpl;
+
 import com.vector.update_app.UpdateAppManager;
+
 
 public class UpdateAppManagerUtils {
     /**

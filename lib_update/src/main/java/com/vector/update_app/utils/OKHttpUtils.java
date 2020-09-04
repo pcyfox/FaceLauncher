@@ -1,7 +1,5 @@
-package com.taike.lib_network;
+package com.vector.update_app.utils;
 
-
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -29,7 +27,6 @@ import okhttp3.ResponseBody;
  * date : 2019-10-25 11:10
  */
 public class OKHttpUtils {
-    private static final String TAG = "OKHttpUtils";
     private static OkHttpClient okHttpClient;
     private final static MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
@@ -161,15 +158,13 @@ public class OKHttpUtils {
 
 
     public static void post(@NonNull OkHttpClient client, @NonNull String url, @NonNull String jsonData, Map<String, String> header, @NonNull Callback callback) {
-        RequestBody requestBody = RequestBody.create(jsonData, JSON);
+        RequestBody requestBody = RequestBody.create(JSON, jsonData);
         Request.Builder builder = new Request.Builder().url(url).post(requestBody);
         if (header != null) {
             for (Map.Entry<String, String> entry : header.entrySet()) {
                 builder.addHeader(entry.getKey(), entry.getValue());
             }
         }
-        if (BuildConfig.DEBUG)
-            Log.d(TAG, "post() called with: client = [" + client + "], url = [" + url + "], jsonData = [" + jsonData + "], header = [" + header + "] ");
         client.newCall(builder.build()).enqueue(callback);
     }
 

@@ -21,12 +21,15 @@ import com.blankj.utilcode.util.AppUtils;
 import com.blankj.utilcode.util.PermissionUtils;
 import com.blankj.utilcode.util.SPStaticUtils;
 import com.elvishew.xlog.XLog;
+import com.taike.lib_common.config.AppConfig;
 import com.taike.lib_utils.IPutils;
 import com.tk.launcher.BuildConfig;
 import com.tk.launcher.R;
+import com.vector.update_app.update.UpdateHelper;
 
 import ch.taike.launcher.App;
 import ch.taike.launcher.SocketMsgHandler;
+import ch.taike.launcher.update.UpdateAppManagerUtils;
 
 public class HomeScreenActivity extends FragmentActivity {
     private static final String TAG = "HomeScreenActivity";
@@ -48,6 +51,12 @@ public class HomeScreenActivity extends FragmentActivity {
         XLog.d(TAG + ":onPostCreate() called with: isAppRoot = [" + AppUtils.isAppRoot() + "]");
         SPStaticUtils.put("IP", IPutils.getIpAdress(this));
         SocketMsgHandler.getInstance().init(this, () -> fragment.getAllApps());
+        checkUpdate();
+    }
+
+
+    private void checkUpdate() {
+        UpdateHelper.getInstance().setHttpManager(UpdateAppManagerUtils.getDefHttpManagerImpl()).checkUpdate(HomeScreenActivity.this, false, AppConfig.getCheckUpDateUrl(), UpdateAppManagerUtils.getDefDownLoadManagerImpl());
     }
 
     @Override

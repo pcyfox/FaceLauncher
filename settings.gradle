@@ -1,2 +1,2 @@
 rootProject.name = 'TKLauncher'
-include ':app', ':lib_log', ':lib_third', ':lib_network', ':lib_utils', ':lib_common','lib_cache','lib_update','module_update'
+include ':app', ':lib_log', ':lib_third', ':lib_network', ':lib_utils', ':lib_common','lib_cache','lib_update'

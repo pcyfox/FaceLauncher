@@ -48,10 +48,6 @@ public class UpdateAppManager {
     //添加默认参数
     private static Map<String, String> params = new HashMap<>();
 
-    static {
-
-    }
-
     private UpdateAppManager(Builder builder) {
         buidlerParam = builder.param;
     }
@@ -106,7 +102,6 @@ public class UpdateAppManager {
             if (buidlerParam.mThemeColor != 0) {
                 bundle.putInt(THEME_KEY, buidlerParam.mThemeColor);
             }
-
             UpdateDialogFragment
                     .newInstance(bundle)
                     .setUpdateDialogFragmentListener(buidlerParam.mUpdateDialogFragmentListener)
@@ -151,9 +146,9 @@ public class UpdateAppManager {
                 versionName = versionName.substring(0, versionName.lastIndexOf('-'));
             }
             if (!TextUtils.isEmpty(versionName)) {
-                params.put("version_name", versionName);
+                params.put("packageName", versionName);
             }
-            params.put("version_code", "" + AppUpdateUtils.getVersionCode(getContext()));
+            params.put("packageCode", "" + AppUpdateUtils.getVersionCode(getContext()));
             params.put("manufacturer", Build.MANUFACTURER);
             params.put("sdk_version", "" + Build.VERSION.SDK_INT);
             params.put("product", Build.PRODUCT);
