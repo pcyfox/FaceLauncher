@@ -26,25 +26,6 @@ public class NormalUpdateCallbackImpl implements UpdateCallback {
     @Override
     public UpdateAppBean parseJson(String json) {
         Log.d(TAG, "parseJson() called with: json = [" + json + "]");
-        //For Test
-//       if(BuildConfig.DEBUG){//忘记注释也不要慌
-//           json = "\n" +
-//                   "{\n" +
-//                   "    \"code\":0,\n" +
-//                   "    \"msg\":\"success\",\n" +
-//                   "    \"data\":{\n" +
-//                   "        \"is_update\":true,\n" +
-//                   "        \"constraint\":false,\n" +
-//                   "        \"is_can_ignore_version\":true,\n" +
-//                   "        \"ignored\":false,\n" +
-//                   "        \"new_version\":\"1.0\",\n" +
-//                   "        \"apk_file_url\":\"http://store.ff.cn/appversion/3skccDLA0y0dqaKa.apk\",\n" +
-//                   "        \"update_log\":\"111\",\n" +
-//                   "        \"new_md5\":\"e2e87efb03bac18d7f95f16cdd73c6c4\"\n" +
-//                   "    }\n" +
-//                   "}";
-//       }
-
         //ignored-------如果使用服务端的这个参数，忽略后APP卸载重装就不能升级！
         UpdateAppBean updateAppBean = new UpdateAppBean();
         try {
@@ -66,7 +47,7 @@ public class NormalUpdateCallbackImpl implements UpdateCallback {
                     .setUpdateLog(data.optString("description"))
                     .setNewMd5(data.optString("md5Code"))
                     .setCanIgnoreVersion(data.optInt("forceStatus") == 0)
-                    .setConstraint(false)
+                    .setConstraint(data.optInt("forceStatus") == 0)
                     .setDismissNotification(true);//隐藏通知栏;
             if (updateAppBean.isConstraint()) {//强制升级
                 // 避免强制升级影响测试版本正常使用
