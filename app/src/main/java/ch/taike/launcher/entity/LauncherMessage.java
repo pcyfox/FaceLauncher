@@ -1,5 +1,8 @@
 package ch.taike.launcher.entity;
 
+import androidx.annotation.Keep;
+
+@Keep
 public class LauncherMessage {
     private Action action;
     private String data;

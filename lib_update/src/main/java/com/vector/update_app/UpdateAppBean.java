@@ -2,6 +2,7 @@ package com.vector.update_app;
 
 
 import androidx.annotation.DrawableRes;
+import androidx.annotation.Keep;
 
 import com.vector.update_app.interf.ApkDownLoadManager;
 
@@ -10,6 +11,7 @@ import java.io.Serializable;
 /**
  * 版本信息
  */
+@Keep
 public class UpdateAppBean implements Serializable {
     private static final long serialVersionUID = 1L;
 

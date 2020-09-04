@@ -5,6 +5,7 @@ import android.graphics.Rect;
 import android.util.Log;
 
 import com.blankj.utilcode.util.ShellUtils;
+import com.blankj.utilcode.util.ToastUtils;
 import com.blankj.utilcode.util.Utils;
 import com.elvishew.xlog.XLog;
 
@@ -54,6 +55,9 @@ public class RootUtils {
             @Override
             public void onCall(ShellUtils.CommandResult data) {
                 XLog.i(TAG + ":adb execCmdAsync called with:cmd=" + cmd + ",result= [" + data + "]");
+                if(data!=null){
+                    ToastUtils.showShort(data.toString());
+                }
             }
         });
     }

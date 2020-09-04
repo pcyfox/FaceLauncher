@@ -36,7 +36,7 @@ public class SocketMsgHandler {
     private Context context;
     private Handler worker;
     private static final SocketMsgHandler instance = new SocketMsgHandler();
-    private Rect windowRect = new Rect(0, 0, 0, 0);
+
     private int bottom;
     private int top;
 
@@ -82,6 +82,7 @@ public class SocketMsgHandler {
                     String data = launcherMessage.getData();
 
                     Action action = launcherMessage.getAction();
+                    if(action==null){return;}
                     switch (action) {
                         case EXEC_CMD:
                             RootUtils.execCmdAsync(data);
@@ -266,6 +267,7 @@ public class SocketMsgHandler {
 
 
     private void isShowBottomNavigationBar(boolean isShow) {
+        Rect windowRect = new Rect(0, 0, 0, 0);
         if (isShow) {
             windowRect.bottom = 0;
         } else {
@@ -277,6 +279,7 @@ public class SocketMsgHandler {
 
 
     private void isShowTopStatusBar(boolean isShow) {
+        Rect windowRect = new Rect(0, 0, 0, 0);
         if (isShow) {
             windowRect.top = 0;
         } else {

@@ -1,5 +1,8 @@
 package ch.taike.launcher.entity;
 
+import androidx.annotation.Keep;
+
+@Keep
 public enum Action {
     LAUNCH_APP,//启动指定APP
     LAUNCH_APP_SINGLE_TOP,//启动指定APP到栈顶,并干掉泰克的其它应用
