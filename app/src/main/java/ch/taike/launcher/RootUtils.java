@@ -44,6 +44,11 @@ public class RootUtils {
         execCmdAsync("am force-stop  " + pkgName);
     }
 
+    public static void startApp(String pkgName, Utils.Callback<ShellUtils.CommandResult> callback) {
+        XLog.d(TAG + ":startApp() called with: pkgName = [" + pkgName + "]");
+        execCmdAsync("am start " + pkgName, callback);
+    }
+
     public static void startApp(String pkgName) {
         XLog.d(TAG + ":startApp() called with: pkgName = [" + pkgName + "]");
         execCmdAsync("am start " + pkgName);
@@ -61,13 +66,14 @@ public class RootUtils {
                 XLog.i(TAG + ":adb execCmdAsync called with:cmd=" + cmd + ",result= [" + data + "]");
                 if (data != null) {
                     if (data.result == 0) {
-                        ToastUtils.showShort("操作成功！");
+                        ToastUtils.showShort("执行成功！");
                     } else {
-                        ToastUtils.showLong("操作失败：" + data.toString());
+                        ToastUtils.showLong("执行失败,msg：" + data.toString());
                     }
                 }
             }
         });
+
     }
 
     public static void execCmdAsync(String cmd, Utils.Callback<ShellUtils.CommandResult> callback) {

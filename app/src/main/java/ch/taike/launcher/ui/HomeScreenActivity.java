@@ -4,9 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -23,6 +20,9 @@ import com.blankj.utilcode.util.ActivityUtils;
 import com.blankj.utilcode.util.AppUtils;
 import com.blankj.utilcode.util.PermissionUtils;
 import com.blankj.utilcode.util.SPStaticUtils;
+import com.blankj.utilcode.util.ShellUtils;
+import com.blankj.utilcode.util.ToastUtils;
+import com.blankj.utilcode.util.Utils;
 import com.elvishew.xlog.XLog;
 import com.taike.lib_common.config.AppConfig;
 import com.taike.lib_utils.IPutils;
@@ -30,13 +30,15 @@ import com.tk.launcher.BuildConfig;
 import com.tk.launcher.R;
 import com.vector.update_app.update.UpdateHelper;
 
-import java.util.List;
-
 import ch.taike.launcher.App;
+import ch.taike.launcher.RootUtils;
+import ch.taike.launcher.entity.Action;
 import ch.taike.launcher.manager.SocketMsgHandler;
 import ch.taike.launcher.update.UpdateAppManagerUtils;
 
 public class HomeScreenActivity extends FragmentActivity {
+
+    private final static String EXAM_APP_PACKAGE_NAME = "com.taike.student";
     private static final String TAG = "HomeScreenActivity";
     private AppsGridFragment fragment;
 
@@ -55,32 +57,44 @@ public class HomeScreenActivity extends FragmentActivity {
         handleUSBDisk();
         XLog.d(TAG + ":onPostCreate() called with: isAppRoot = [" + AppUtils.isAppRoot() + "]");
         SPStaticUtils.put("IP", IPutils.getIpAdress(this));
+        initSocketManager();
+    }
+
+    private void initSocketManager() {
         SocketMsgHandler.getInstance().init(this, () -> fragment.getAllApps());
+        SocketMsgHandler.getInstance().setMessageInterceptor(message -> {
+            if (message.getAction() != Action.LAUNCH_APP) {
+                return false;
+            }
+            ShellUtils.CommandResult re = ShellUtils.execCmd("ps", true);
+            if (re.successMsg.contains(EXAM_APP_PACKAGE_NAME)) {
+                ToastUtils.showLong("考生端软件正在运行,不能切换应用");
+                return true;
+            }
+            return false;
+        });
     }
 
 
     private void checkUpdate() {
         Log.d(TAG, "checkUpdate() called");
-        getRunningApp();
         UpdateHelper.getInstance().setHttpManager(UpdateAppManagerUtils.getDefHttpManagerImpl()).checkUpdate(HomeScreenActivity.this, false, AppConfig.getCheckUpDateUrl(), UpdateAppManagerUtils.getDefDownLoadManagerImpl());
     }
 
     public void getRunningApp() {
-        PackageManager localPackageManager = getPackageManager();
-        List localList = localPackageManager.getInstalledPackages(0);
-        for (int i = 0; i < localList.size(); i++) {
-            PackageInfo localPackageInfo1 = (PackageInfo) localList.get(i);
-            String str1 = localPackageInfo1.packageName.split(":")[0];
-            if (((ApplicationInfo.FLAG_SYSTEM & localPackageInfo1.applicationInfo.flags) == 0) && ((ApplicationInfo.FLAG_UPDATED_SYSTEM_APP & localPackageInfo1.applicationInfo.flags) == 0) && ((ApplicationInfo.FLAG_STOPPED & localPackageInfo1.applicationInfo.flags) == 0)) {
-                Log.e(TAG, "getRunningApp:" + str1);
+        RootUtils.execCmdAsync("ps", new Utils.Callback<ShellUtils.CommandResult>() {
+            @Override
+            public void onCall(ShellUtils.CommandResult data) {
+                XLog.e(TAG + ":onCall() called with ps: data = [" + data + "]");
             }
-        }
-
+        });
     }
+
 
     @Override
     protected void onPostResume() {
         super.onPostResume();
+        getRunningApp();
         PermissionUtils.permission(PermissionConstants.STORAGE).request();
         String ip = SPStaticUtils.getString("IP");
         if (!TextUtils.isEmpty(ip)) {
@@ -99,7 +113,7 @@ public class HomeScreenActivity extends FragmentActivity {
         }
 
         double delay = Math.random() * 1000 * 60 * 5;
-        Log.d(TAG, "onPostResume() called delay="+delay);
+        Log.d(TAG, "onPostResume() called delay=" + delay);
         getWindow().getDecorView().postDelayed(new Runnable() {
             @Override
             public void run() {

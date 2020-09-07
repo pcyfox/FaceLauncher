@@ -42,6 +42,8 @@ public class SocketMsgHandler {
     private int bottom;
     private int top;
 
+    private MessageInterceptor messageInterceptor;
+
     private SocketMsgHandler() {
     }
 
@@ -80,11 +82,16 @@ public class SocketMsgHandler {
                     if (launcherMessage == null) {
                         return;
                     }
+                    if (messageInterceptor != null && messageInterceptor.intercept(launcherMessage)) {
+                        return;
+                    }
                     ToastUtils.showShort(msg);
                     String data = launcherMessage.getData();
-
                     Action action = launcherMessage.getAction();
-                    if(action==null){return;}
+
+                    if (action == null) {
+                        return;
+                    }
                     switch (action) {
                         case EXEC_CMD:
                             RootUtils.execCmdAsync(data);
@@ -225,6 +232,7 @@ public class SocketMsgHandler {
         try {
             return GsonUtils.fromJson(msg, LauncherMessage.class);
         } catch (Exception e) {
+            ToastUtils.showShort("参数格式有误！");
             e.printStackTrace();
         }
         return null;
@@ -302,8 +310,16 @@ public class SocketMsgHandler {
         context.sendBroadcast(intent, BROADCAST_PERMISSION_DISC);   //发送广播
     }
 
+    public void setMessageInterceptor(MessageInterceptor messageInterceptor) {
+        this.messageInterceptor = messageInterceptor;
+    }
+
     public interface AppModelGetter {
         List<AppModel> get();
+    }
+
+    public interface MessageInterceptor {
+        boolean intercept(LauncherMessage message);
     }
 
 }
