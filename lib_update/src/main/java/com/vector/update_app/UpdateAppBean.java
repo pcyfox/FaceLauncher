@@ -24,8 +24,8 @@ public class UpdateAppBean implements Serializable {
      * newMd5 : xxxxxxxxxxxxxx
      * targetSize : 601132
      */
-    //是否需要升级
     private boolean isUpdate;
+    //是否需要升级
     private boolean ignored;
     //提示次数,tipCount=-1,代表弹出次数无限制
     private int tipCount = -1;

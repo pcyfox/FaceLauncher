@@ -10,7 +10,6 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
@@ -26,7 +25,6 @@ import com.vector.update_app.listener.ExceptionHandlerHelper;
 import com.vector.update_app.listener.IUpdateDialogFragmentListener;
 import com.vector.update_app.service.DownloadService;
 import com.vector.update_app.utils.AppUpdateUtils;
-
 
 import java.io.File;
 import java.util.HashMap;
@@ -129,12 +127,11 @@ public class UpdateAppManager {
             buidlerParam.mActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(buidlerParam.mActivity, "app正在更新", Toast.LENGTH_SHORT).show();
+                    // Toast.makeText(buidlerParam.mActivity, "检测更新", Toast.LENGTH_SHORT).show();
                 }
             });
             return;
         }
-
 
         if (!buidlerParam.mIgnoreDefParams) {
             if (!TextUtils.isEmpty(buidlerParam.mAppKey)) {
@@ -154,6 +151,7 @@ public class UpdateAppManager {
             params.put("sdk_version", "" + Build.VERSION.SDK_INT);
             params.put("product", Build.PRODUCT);
             params.put("cpu_abi", Build.CPU_ABI);
+            params.put("IS_DEBUG", "" + BuildConfig.DEBUG);
         }
 
         //添加自定义参数，其实可以实现HttManager中添加

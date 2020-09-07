@@ -13,6 +13,7 @@ public final class AppConfig {
     private static String baseUrl;
     public static final String NET_CAMERA_ACCOUNT = "admin";
     public static final String NET_CAMERA_PSD = "123456";
+
     public static String getBaseUrl() {
         if (BuildConfig.DEBUG) return BuildConfig.DEBUG_URL;
         return BuildConfig.BASE_URL;
@@ -34,10 +35,11 @@ public final class AppConfig {
 
 
     public static String getCheckUpDateUrl() {
+        String findNewApk = "equipment-service/equipmentApk/findNewApk";
         if (BuildConfig.DEBUG) {
-            return BuildConfig.DEBUG_URL + "equipment-service/equipmentApk/findNewApk";
+            return BuildConfig.DEBUG_URL + findNewApk;
         } else {
-            return BuildConfig.BASE_URL + "equipment-service/equipmentApk/findNewApk";
+            return BuildConfig.BASE_URL + findNewApk;
         }
     }
 

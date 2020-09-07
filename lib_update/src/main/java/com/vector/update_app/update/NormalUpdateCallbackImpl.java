@@ -2,7 +2,6 @@ package com.vector.update_app.update;
 
 import android.util.Log;
 
-import com.vector.update_app.BuildConfig;
 import com.vector.update_app.R;
 import com.vector.update_app.UpdateAppBean;
 import com.vector.update_app.UpdateAppManager;
@@ -26,6 +25,7 @@ public class NormalUpdateCallbackImpl implements UpdateCallback {
     @Override
     public UpdateAppBean parseJson(String json) {
         Log.d(TAG, "parseJson() called with: json = [" + json + "]");
+        //System.out.println("parseJson() called with: json = [" + json + "]");
         //ignored-------如果使用服务端的这个参数，忽略后APP卸载重装就不能升级！
         UpdateAppBean updateAppBean = new UpdateAppBean();
         try {
@@ -33,8 +33,10 @@ public class NormalUpdateCallbackImpl implements UpdateCallback {
             if (0 != jsonObject.optInt("resultCode")) {
                 return null;
             }
+            if (json.contains("null")) {
+                return null;
+            }
             JSONObject data = jsonObject.getJSONObject("data");
-
             if (data == null) {
                 return new UpdateAppBean();
             }
@@ -46,14 +48,14 @@ public class NormalUpdateCallbackImpl implements UpdateCallback {
                     .setTargetSize(data.optString("apkSize"))
                     .setUpdateLog(data.optString("description"))
                     .setNewMd5(data.optString("md5Code"))
-                    .setCanIgnoreVersion(data.optInt("forceStatus") == 0)
-                    .setConstraint(data.optInt("forceStatus") == 0)
-                    .setDismissNotification(true);//隐藏通知栏;
+                    .setConstraint(data.optInt("forceStatus") == 0)//0:可忽略
+                    .setCanIgnoreVersion(data.optInt("negligible") == 0)
+                    .setDismissNotification(true);//隐藏通知栏
             if (updateAppBean.isConstraint()) {//强制升级
                 // 避免强制升级影响测试版本正常使用
-                if (BuildConfig.DEBUG) {
-                    updateAppBean.setConstraint(false);
-                }
+//                if (BuildConfig.DEBUG) {
+//                    updateAppBean.setConstraint(false);
+//                }
                 updateAppBean.setDialogTopBg(R.drawable.ic_update_app_top_bg_constraint);
             } else if (updateAppBean.isCanIgnoreVersion()) {
                 updateAppBean.setDialogTopBg(R.drawable.ic_update_app_top_bg_can_ignore);

@@ -4,6 +4,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -26,6 +29,8 @@ import com.taike.lib_utils.IPutils;
 import com.tk.launcher.BuildConfig;
 import com.tk.launcher.R;
 import com.vector.update_app.update.UpdateHelper;
+
+import java.util.List;
 
 import ch.taike.launcher.App;
 import ch.taike.launcher.manager.SocketMsgHandler;
@@ -51,12 +56,26 @@ public class HomeScreenActivity extends FragmentActivity {
         XLog.d(TAG + ":onPostCreate() called with: isAppRoot = [" + AppUtils.isAppRoot() + "]");
         SPStaticUtils.put("IP", IPutils.getIpAdress(this));
         SocketMsgHandler.getInstance().init(this, () -> fragment.getAllApps());
-        checkUpdate();
     }
 
 
     private void checkUpdate() {
+        Log.d(TAG, "checkUpdate() called");
+        getRunningApp();
         UpdateHelper.getInstance().setHttpManager(UpdateAppManagerUtils.getDefHttpManagerImpl()).checkUpdate(HomeScreenActivity.this, false, AppConfig.getCheckUpDateUrl(), UpdateAppManagerUtils.getDefDownLoadManagerImpl());
+    }
+
+    public void getRunningApp() {
+        PackageManager localPackageManager = getPackageManager();
+        List localList = localPackageManager.getInstalledPackages(0);
+        for (int i = 0; i < localList.size(); i++) {
+            PackageInfo localPackageInfo1 = (PackageInfo) localList.get(i);
+            String str1 = localPackageInfo1.packageName.split(":")[0];
+            if (((ApplicationInfo.FLAG_SYSTEM & localPackageInfo1.applicationInfo.flags) == 0) && ((ApplicationInfo.FLAG_UPDATED_SYSTEM_APP & localPackageInfo1.applicationInfo.flags) == 0) && ((ApplicationInfo.FLAG_STOPPED & localPackageInfo1.applicationInfo.flags) == 0)) {
+                Log.e(TAG, "getRunningApp:" + str1);
+            }
+        }
+
     }
 
     @Override
@@ -78,6 +97,15 @@ public class HomeScreenActivity extends FragmentActivity {
                 }
             }, 1);
         }
+
+        double delay = Math.random() * 1000 * 60 * 5;
+        Log.d(TAG, "onPostResume() called delay="+delay);
+        getWindow().getDecorView().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                checkUpdate();
+            }
+        }, (int) delay);
     }
 
     private void handleUSBDisk() {

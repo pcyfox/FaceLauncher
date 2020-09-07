@@ -1,6 +1,7 @@
 package com.vector.update_app.update;
 
 import android.app.Activity;
+import android.util.Log;
 
 import com.vector.update_app.UpdateAppBean;
 import com.vector.update_app.UpdateAppManager;
@@ -53,6 +54,7 @@ public final class UpdateHelper {
      * @param isCheckUpdateByUser 是否为用户手动触发升级，此时会不管之前是否已经忽略过该版本
      */
     public void checkUpdate(Activity activity, final boolean isCheckUpdateByUser, String url, ApkDownLoadManager apkDownLoadManager) {
+        Log.d(TAG, "checkUpdate() called with: activity = [" + activity + "], isCheckUpdateByUser = [" + isCheckUpdateByUser + "], url = [" + url + "], apkDownLoadManager = [" + apkDownLoadManager + "]");
         SettingStorage.get().init(activity);
         builder.setDownLoadManager(apkDownLoadManager)
                 .setHttpManager(httpManager)

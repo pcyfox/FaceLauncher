@@ -5,14 +5,12 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.blankj.utilcode.util.AppUtils;
-import com.blankj.utilcode.util.ShellUtils;
 import com.blankj.utilcode.util.ToastUtils;
-import com.blankj.utilcode.util.Utils;
+import com.elvishew.xlog.XLog;
 import com.taike.lib_common.config.AppConfig;
 import com.taike.lib_network.download.DownLoadCallback;
 import com.taike.lib_network.download.DownloadInfo;
 import com.taike.lib_network.download.DownloadManager;
-import com.taike.lib_utils.ToastUtil;
 import com.vector.update_app.interf.ApkDownLoadManager;
 import com.vector.update_app.utils.OKHttpUtils;
 
@@ -72,16 +70,19 @@ public class DefDownLoadManagerImpl implements ApkDownLoadManager {
 
                         @Override
                         public void onFinish(String file) {
-                            Log.d(TAG, "onFinish() called with: file = [" + file + "]");
-                            if(!AppUtils.isAppRoot()){
+                            XLog.i(TAG + ":onFinish() called with: file = [" + file + "]");
+                            if (!AppUtils.isAppRoot()) {
+                                XLog.w(TAG + ":onFinish() called isAppRoot=false");
                                 callback.onFinish(new File(file), true);
                                 return;
                             }
                             RootUtils.installAPK(file, data -> {
                                 if (data.result == 0) {
-                                    callback.onFinish(new File(file), false);
                                     ToastUtils.showShort("安装成功！");
+                                    callback.onFinish(new File(file), false);
+                                    XLog.i(TAG + "onFinish() called shell install apk fail! error:"+data.successMsg);
                                 } else {
+                                    XLog.i(TAG + "onFinish() called shell install apk fail! error:"+data.errorMsg);
                                     callback.onFinish(new File(file), true);
                                 }
                             });

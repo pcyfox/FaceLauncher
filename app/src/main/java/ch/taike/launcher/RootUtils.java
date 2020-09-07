@@ -27,7 +27,7 @@ public class RootUtils {
     }
 
     public static void installAPK(String apkPath, Utils.Callback<ShellUtils.CommandResult> callback) {
-        execCmdAsync(" install -r " + apkPath, callback);
+        execCmdAsync("pm install -r " + apkPath, callback);
     }
 
     public static void uninstallAPK(String packName) {
