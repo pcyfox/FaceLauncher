@@ -103,6 +103,7 @@ public class SocketMsgHandler {
                             launchApp(data, true);
                             break;
                         case LAUNCH_APP:
+                        case LAUNCH_APP_BY_FORCE:
                             launchApp(data, false);
                             break;
                         case NOTIFY_APP_UPDATE:

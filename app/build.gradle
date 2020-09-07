@@ -5,7 +5,7 @@ apply plugin: 'kotlin-kapt'
 def projectName = "TK-Launcher"
 def rootDependencies = rootProject.ext.dependencies
 def APP_TYPE = 0//0：桌面  1：桌面调试工具
-def UDPClientPort = 1198
+def UDPClientPort = 9993
 android {
     compileSdkVersion project.compileSdkVersion
     defaultConfig {

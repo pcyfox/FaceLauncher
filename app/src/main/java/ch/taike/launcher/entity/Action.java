@@ -6,6 +6,7 @@ import androidx.annotation.Keep;
 public enum Action {
     LAUNCH_APP,//启动指定APP
     LAUNCH_APP_SINGLE_TOP,//启动指定APP到栈顶,并干掉泰克的其它应用
+    LAUNCH_APP_BY_FORCE,//启动指定APP,无论考试端是否在运行
     CLOSE_APP,//关闭指定APP
     NOTIFY_APP_UPDATE,//通知指定APP进行更新检测
     CLEAR_APP,//清理数据和缓存
