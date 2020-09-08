@@ -26,6 +26,7 @@ import com.blankj.utilcode.util.Utils;
 import com.elvishew.xlog.XLog;
 import com.taike.lib_common.config.AppConfig;
 import com.taike.lib_utils.IPutils;
+import com.taike.lib_utils.Util;
 import com.tk.launcher.BuildConfig;
 import com.tk.launcher.R;
 import com.vector.update_app.update.UpdateHelper;
@@ -37,10 +38,10 @@ import ch.taike.launcher.manager.SocketMsgHandler;
 import ch.taike.launcher.update.UpdateAppManagerUtils;
 
 public class HomeScreenActivity extends FragmentActivity {
-
     private final static String EXAM_APP_PACKAGE_NAME = "com.taike.student";
     private static final String TAG = "HomeScreenActivity";
     private AppsGridFragment fragment;
+    private int count = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +50,19 @@ public class HomeScreenActivity extends FragmentActivity {
         fragment = (AppsGridFragment) getSupportFragmentManager().findFragmentById(R.id.apps_grid);
         TextView versionName = findViewById(R.id.tv_version);
         versionName.setText(AppUtils.getAppVersionName());
+        TextView tvDeviceID = findViewById(R.id.tv_device_id);
+        tvDeviceID.setText(Util.genClientId());
+        versionName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                count++;
+                if (count % 7 == 0) {
+                    tvDeviceID.setVisibility(View.VISIBLE);
+                } else {
+                    tvDeviceID.setVisibility(View.GONE);
+                }
+            }
+        });
     }
 
     @Override
