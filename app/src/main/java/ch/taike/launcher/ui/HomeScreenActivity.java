@@ -126,7 +126,7 @@ public class HomeScreenActivity extends FragmentActivity {
             }, 1);
         }
 
-        double delay = Math.random() * 1000 * 60 * 2;
+        double delay = Math.random() * 500 * 60;
         Log.d(TAG, "onPostResume() called delay=" + delay);
         getWindow().getDecorView().postDelayed(new Runnable() {
             @Override

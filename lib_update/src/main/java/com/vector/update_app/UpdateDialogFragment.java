@@ -237,10 +237,16 @@ public class UpdateDialogFragment extends DialogFragment implements View.OnClick
                 mIgnore.setText("暂不体验");
                 return;
             }
-
+            mIgnore.setVisibility(View.VISIBLE);
+            mIvClose.setVisibility(View.VISIBLE);
             //强制更新
             if (mUpdateApp.isConstraint()) {
-                mIgnore.setText("退出应用");
+                if (mUpdateApp.isNeedExitAppWhenConstraint()) {
+                    mIgnore.setText("退出应用");
+                } else {
+                    mIvClose.setVisibility(View.GONE);
+                    mIgnore.setVisibility(View.GONE);
+                }
                 state = STATE_CONSTRAINT;
             } else if (mUpdateApp.isCanIgnoreVersion()) {
                 state = STATE_IGNORE;

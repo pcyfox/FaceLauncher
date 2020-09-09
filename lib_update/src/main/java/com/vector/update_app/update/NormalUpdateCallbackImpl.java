@@ -6,6 +6,7 @@ import com.vector.update_app.R;
 import com.vector.update_app.UpdateAppBean;
 import com.vector.update_app.UpdateAppManager;
 import com.vector.update_app.interf.UpdateCallback;
+import com.vector.update_app.utils.AppUpdateUtils;
 
 import org.json.JSONObject;
 
@@ -39,15 +40,21 @@ public class NormalUpdateCallbackImpl implements UpdateCallback {
             }
             updateAppBean
                     .setUpdate(true)
+                    .setNeedExitAppWhenConstraint(false)
                     .setOriginRes(json)
                     .setNewVersion(data.optString("versionName"))
                     .setApkFileUrl(data.optString("apkUrl"))
                     .setTargetSize(data.optString("apkSize"))
                     .setUpdateLog(data.optString("description"))
                     .setNewMd5(data.optString("md5Code"))
-                    .setConstraint(data.optInt("forceStatus") == 0)//0:可忽略
-                    .setCanIgnoreVersion(data.optInt("negligible") == 0)
+                    .setConstraint(data.optInt("forceStatus") == 1)
+                    .setCanIgnoreVersion(data.optInt("negligible") == 0)//0:可忽略
                     .setDismissNotification(true);//隐藏通知栏
+
+
+            if (updateAppBean.isCanIgnoreVersion()) {
+                updateAppBean.setIgnored(AppUpdateUtils.isNeedIgnore(UpdateHelper.getInstance().getContext(), updateAppBean.getNewVersion()));
+            }
             if (updateAppBean.isConstraint()) {//强制升级
                 // 避免强制升级影响测试版本正常使用
 //                if (BuildConfig.DEBUG) {

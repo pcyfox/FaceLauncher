@@ -40,7 +40,7 @@ public class UpdateAppManager {
     private final static String UPDATE_APP_KEY = "UPDATE_APP_KEY";
     private static final String TAG = UpdateAppManager.class.getSimpleName();
     private UpdateAppBean mUpdateApp;
-    private final BuidlerParam buidlerParam;
+    private final BuilderParam buidlerParam;
 
 
     //添加默认参数
@@ -88,6 +88,7 @@ public class UpdateAppManager {
      * @return 是否弹窗
      */
     public boolean showDialogFragment() {
+        Log.d(TAG, "showDialogFragment() called");
         //校验
         if (!isOk()) return false;
         if (buidlerParam.mActivity != null && !buidlerParam.mActivity.isFinishing()) {
@@ -283,7 +284,7 @@ public class UpdateAppManager {
     }
 
 
-    private static class BuidlerParam {
+    private static class BuilderParam {
         private Activity mActivity;
         private HttpManager mHttpManager;
         private ApkDownLoadManager downLoadManager;
@@ -312,7 +313,7 @@ public class UpdateAppManager {
     }
 
     public static class Builder {
-        private BuidlerParam param = new BuidlerParam();
+        private BuilderParam param = new BuilderParam();
 
         public Builder setUpdateCallback(UpdateCallback updateCallback) {
             param.updateCallback = updateCallback;

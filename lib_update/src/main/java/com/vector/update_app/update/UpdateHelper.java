@@ -1,6 +1,7 @@
 package com.vector.update_app.update;
 
 import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
 
 import com.vector.update_app.UpdateAppBean;
@@ -19,6 +20,7 @@ public final class UpdateHelper {
     private static UpdateHelper instance = new UpdateHelper();
     private HttpManager httpManager;
     private final UpdateAppManager.Builder builder;
+    private Context context;
 
     private UpdateHelper() {
         builder = new UpdateAppManager.Builder();
@@ -53,6 +55,7 @@ public final class UpdateHelper {
      * @param isCheckUpdateByUser 是否为用户手动触发升级，此时会不管之前是否已经忽略过该版本
      */
     public void checkUpdate(Activity activity, final boolean isCheckUpdateByUser, String url, ApkDownLoadManager apkDownLoadManager) {
+        context=activity.getApplicationContext();
         Log.d(TAG, "checkUpdate() called with: activity = [" + activity + "], isCheckUpdateByUser = [" + isCheckUpdateByUser + "], url = [" + url + "], apkDownLoadManager = [" + apkDownLoadManager + "]");
         if (httpManager == null) {
             Log.e(TAG, " error:checkUpdate():  httpManager == null ");
@@ -107,6 +110,10 @@ public final class UpdateHelper {
                     }
                 }).build()
                 .checkUpdate();
+    }
+
+    public Context getContext() {
+        return context;
     }
 
     public UpdateHelper setHttpManager(HttpManager httpManager) {

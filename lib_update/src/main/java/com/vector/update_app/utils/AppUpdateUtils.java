@@ -18,6 +18,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.FileProvider;
@@ -45,6 +46,7 @@ public class AppUpdateUtils {
     private final static String TIP_COUNT_VERSION_KEY = "TIP_COUNT_VERSION_KEY";
     private final static String COUNT_KEY = "COUNT_KEY";
     private final static String VERSION_KEY = "VERSION_KEY";
+    private static final String TAG = "AppUpdateUtils";
 
     public static boolean isWifi(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -244,6 +246,7 @@ public class AppUpdateUtils {
 
 
     public static void saveIgnoreVersion(Context context, String newVersion) {
+        Log.d(TAG, "saveIgnoreVersion() called with: context = [" + context + "], newVersion = [" + newVersion + "]");
         getSP(context).edit().putString(IGNORE_VERSION, newVersion).apply();
     }
 

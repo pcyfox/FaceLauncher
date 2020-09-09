@@ -419,8 +419,12 @@ public class DownloadManager {
             InputStream is = body.byteStream();
             try {
                 File file = new File(storePath, downloadInfo.getFileName());
-                if (!file.getParentFile().exists()) {
-                    file.getParentFile().mkdirs();// 能创建多级目录
+                if (file.exists()) {
+                    file.delete();
+                }else {
+                    if (!file.getParentFile().exists()) {
+                        file.getParentFile().mkdirs();// 能创建多级目录
+                    }
                 }
 
                 DiskLruCache.Editor editor = null;

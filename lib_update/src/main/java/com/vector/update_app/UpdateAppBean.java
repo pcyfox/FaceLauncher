@@ -55,6 +55,7 @@ public class UpdateAppBean implements Serializable {
     private boolean mHideDialog;
     private boolean isDismissNotification;
     private boolean mOnlyWifi;
+    private boolean isNeedExitAppWhenConstraint = true;//强制升级时，如果用户拒绝升级是否退出APP
     //对话框顶部图片
     @DrawableRes
     private int dialogTopBg = -1;
@@ -78,7 +79,7 @@ public class UpdateAppBean implements Serializable {
 
     public UpdateAppBean setIgnored(boolean ignored) {
         this.ignored = ignored;
-        return  this;
+        return this;
     }
 
     public String getStorePath() {
@@ -106,6 +107,7 @@ public class UpdateAppBean implements Serializable {
         return this;
     }
 
+
     public boolean getUpdate() {
         return isUpdate;
     }
@@ -128,6 +130,14 @@ public class UpdateAppBean implements Serializable {
         return apkFileUrl;
     }
 
+    public UpdateAppBean setNeedExitAppWhenConstraint(boolean needExitAppWhenConstraint) {
+        isNeedExitAppWhenConstraint = needExitAppWhenConstraint;
+        return this;
+    }
+
+    public boolean isNeedExitAppWhenConstraint() {
+        return isNeedExitAppWhenConstraint;
+    }
 
     public UpdateAppBean setApkFileUrl(String apk_file_url) {
         this.apkFileUrl = apk_file_url;
