@@ -33,11 +33,8 @@ public class NormalUpdateCallbackImpl implements UpdateCallback {
             if (0 != jsonObject.optInt("resultCode")) {
                 return null;
             }
-            if (json.contains("null")) {
-                return null;
-            }
             JSONObject data = jsonObject.getJSONObject("data");
-            if (data == null) {
+            if (data == null || data == JSONObject.NULL) {
                 return new UpdateAppBean();
             }
             updateAppBean

@@ -139,7 +139,7 @@ public class SocketMsgHandler {
 
     private void installApp(String data) {
         if (new File(data).exists()) {
-            RootUtils.installAPK(context, data);
+            RootUtils.installAPK(data, null);
         } else {
             download(data, true);
         }
@@ -186,7 +186,7 @@ public class SocketMsgHandler {
                 XLog.i(TAG + ";onFinish() called with: file = [" + file + "]");
                 if (installApk && file.toLowerCase().endsWith("apk")) {
                     ToastUtils.showLong("APK下载成功,开始安装");
-                    RootUtils.installAPK(context, file);
+                    RootUtils.installAPK(file, null);
                 } else {
                     ToastUtils.showShort("下载完成！file:" + file);
                 }

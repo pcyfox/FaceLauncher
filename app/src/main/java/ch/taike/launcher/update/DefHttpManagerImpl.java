@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.blankj.utilcode.util.GsonUtils;
+import com.elvishew.xlog.XLog;
 import com.vector.update_app.interf.HttpManager;
 import com.vector.update_app.utils.OKHttpUtils;
 
@@ -20,6 +21,8 @@ import okhttp3.Response;
  */
 
 public class DefHttpManagerImpl implements HttpManager {
+    private static final String TAG = "DefHttpManagerImpl";
+
     /**
      * 异步get
      *
@@ -29,6 +32,7 @@ public class DefHttpManagerImpl implements HttpManager {
      */
     @Override
     public void asyncGet(@NonNull String url, @NonNull Map<String, String> params, @Nullable Map<String, String> header, @Nullable final HttpCallback callBack) {
+        XLog.i(TAG + "asyncGet() called with: url = [" + url + "], params = [" + params + "], header = [" + header + "], callBack = [" + callBack + "]");
         OKHttpUtils.get(url, new okhttp3.Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -51,7 +55,8 @@ public class DefHttpManagerImpl implements HttpManager {
      */
     @Override
     public void asyncPost(@NonNull String url, @Nullable Map<String, String> params, @Nullable Map<String, String> header, @Nullable final HttpCallback callBack) {
-        OKHttpUtils.post(url, GsonUtils.toJson(params),header, new okhttp3.Callback() {
+        XLog.i(TAG + ":asyncPost() called with: url = [" + url + "], params = [" + params + "], header = [" + header + "], callBack = [" + callBack + "]");
+        OKHttpUtils.post(url, GsonUtils.toJson(params), header, new okhttp3.Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 callBack.onError(e.getMessage());

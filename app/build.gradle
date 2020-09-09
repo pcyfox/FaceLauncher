@@ -13,7 +13,7 @@ android {
         minSdkVersion project.minSdkVersion
         targetSdkVersion project.androidTargetSdk
         versionCode 1
-        versionName "V1.01"
+        versionName "V1.0.1"
 
         buildConfigField("Integer", "APP_TYPE", APP_TYPE.toInteger().toString())
         buildConfigField("Integer", "UDP_CLIENT_PORT", UDPClientPort.toInteger().toString())
@@ -43,6 +43,12 @@ android {
     }
     buildTypes {
         release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+
+        debug {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release

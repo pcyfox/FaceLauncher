@@ -21,7 +21,6 @@ public final class UpdateHelper {
     private final UpdateAppManager.Builder builder;
 
     private UpdateHelper() {
-        httpManager = new HttpManagerImpl();
         builder = new UpdateAppManager.Builder();
 
     }
@@ -55,6 +54,10 @@ public final class UpdateHelper {
      */
     public void checkUpdate(Activity activity, final boolean isCheckUpdateByUser, String url, ApkDownLoadManager apkDownLoadManager) {
         Log.d(TAG, "checkUpdate() called with: activity = [" + activity + "], isCheckUpdateByUser = [" + isCheckUpdateByUser + "], url = [" + url + "], apkDownLoadManager = [" + apkDownLoadManager + "]");
+        if (httpManager == null) {
+            Log.e(TAG, " error:checkUpdate():  httpManager == null ");
+            return;
+        }
         SettingStorage.get().init(activity);
         builder.setDownLoadManager(apkDownLoadManager)
                 .setHttpManager(httpManager)
@@ -68,7 +71,7 @@ public final class UpdateHelper {
                     public void onUpdateNotifyDialogOnStart(UpdateAppBean updateApp) {
                         if (!isCheckUpdateByUser) {
                             SettingStorage.get().write(UPDATE_DIALOG_SHOWN_TIMES, getTimes() + 1);
-                            SettingStorage.get().write(REQUEST_PARAM, ""+builder.getRequestParams());
+                            SettingStorage.get().write(REQUEST_PARAM, "" + builder.getRequestParams());
                         }
                     }
 

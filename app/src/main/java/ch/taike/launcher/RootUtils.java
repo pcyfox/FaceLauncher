@@ -19,12 +19,6 @@ public class RootUtils {
         return ShellUtils.execCmd("chmod 777 " + context.getPackageCodePath(), true);
     }
 
-    /**
-     * 安装apk
-     */
-    public static void installAPK(Context context, String apkPath) {
-        execCmdAsync("pm install -i " + context.getPackageName() + " --user 0 " + apkPath);
-    }
 
     public static void installAPK(String apkPath, Utils.Callback<ShellUtils.CommandResult> callback) {
         execCmdAsync("pm install -r " + apkPath, callback);
@@ -40,17 +34,14 @@ public class RootUtils {
 
 
     public static void killApp(String pkgName) {
-        XLog.d(TAG + ":killApp() called with: pkgName = [" + pkgName + "]");
         execCmdAsync("am force-stop  " + pkgName);
     }
 
     public static void startApp(String pkgName, Utils.Callback<ShellUtils.CommandResult> callback) {
-        XLog.d(TAG + ":startApp() called with: pkgName = [" + pkgName + "]");
         execCmdAsync("am start " + pkgName, callback);
     }
 
     public static void startApp(String pkgName) {
-        XLog.d(TAG + ":startApp() called with: pkgName = [" + pkgName + "]");
         execCmdAsync("am start " + pkgName);
     }
 
@@ -77,6 +68,10 @@ public class RootUtils {
     }
 
     public static void execCmdAsync(String cmd, Utils.Callback<ShellUtils.CommandResult> callback) {
+        if (callback == null) {
+            execCmdAsync(cmd);
+            return;
+        }
         ShellUtils.execCmdAsync(cmd, true, callback);
     }
 }

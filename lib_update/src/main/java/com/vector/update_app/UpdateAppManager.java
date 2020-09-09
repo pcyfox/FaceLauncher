@@ -263,6 +263,7 @@ public class UpdateAppManager {
             if (mUpdateApp == null) {
                 return;
             }
+            Log.d(TAG, "processData() called with: result = [" + result + "], mUpdateApp = [" + mUpdateApp + "]");
             mUpdateApp.setStorePath(buidlerParam.storePath);
             mUpdateApp.setDownLoadManager(buidlerParam.downLoadManager);
 

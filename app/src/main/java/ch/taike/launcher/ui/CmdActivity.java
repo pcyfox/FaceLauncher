@@ -5,12 +5,14 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import com.blankj.utilcode.constant.PermissionConstants;
+import com.blankj.utilcode.util.AppUtils;
 import com.blankj.utilcode.util.GsonUtils;
 import com.blankj.utilcode.util.PermissionUtils;
 import com.taike.lib_network.udp.UDPSocketClient;
@@ -35,7 +37,8 @@ public class CmdActivity extends FragmentActivity {
         PermissionUtils.permission(PermissionConstants.STORAGE);
         editTextCmd = findViewById(R.id.et_dmd);
         editTextCmd.setText("{\"action\":\"CLOSE_APP\",\"data\":\"com.taike.edu.stu\"}");
-
+        TextView versionName = findViewById(R.id.tv_version_name);
+        versionName.setText(AppUtils.getAppVersionName());
         LinearLayout linearLayout = findViewById(R.id.ll_cmd);
         for (final Action action : Action.values()) {
             RadioButton button = new RadioButton(this);
@@ -49,6 +52,8 @@ public class CmdActivity extends FragmentActivity {
                 }
             });
         }
+
+
     }
 
 
