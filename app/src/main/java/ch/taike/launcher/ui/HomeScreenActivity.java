@@ -77,6 +77,10 @@ public class HomeScreenActivity extends FragmentActivity {
     private void initSocketManager() {
         SocketMsgHandler.getInstance().init(this, () -> fragment.getAllApps());
         SocketMsgHandler.getInstance().setMessageInterceptor(message -> {
+            if (message.getAction() == Action.NOTIFY_APP_UPDATE) {
+                checkUpdate();
+                return false;
+            }
             if (message.getAction() != Action.LAUNCH_APP) {
                 return false;
             }
