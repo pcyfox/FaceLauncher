@@ -25,6 +25,7 @@ public class RootUtils {
     }
 
     public static void uninstallAPK(String packName) {
+        XLog.i(TAG + ":uninstallAPK() called with: packName = [" + packName + "]");
         execCmdAsync("pm uninstall --user 0 " + packName);
     }
 
@@ -64,7 +65,6 @@ public class RootUtils {
                 }
             }
         });
-
     }
 
     public static void execCmdAsync(String cmd, Utils.Callback<ShellUtils.CommandResult> callback) {

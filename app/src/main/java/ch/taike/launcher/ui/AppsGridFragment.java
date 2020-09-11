@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ch.taike.launcher.AppListAdapter;
+import ch.taike.launcher.RootUtils;
 import ch.taike.launcher.entity.AppModel;
 import ch.taike.launcher.AppsLoader;
 import ch.taike.launcher.entity.Action;
@@ -79,6 +80,20 @@ public class AppsGridFragment extends GridFragment implements LoaderManager.Load
         } else {
             setGridShownNoAnimation(true);
         }
+        //卸载其它桌面应用
+//        for (AppModel appModel : apps) {
+//            if (appModel.getApplicationPackageName().equals(getActivity().getPackageName())) {
+//                return;
+//            }
+//            Intent intent = getActivity().getPackageManager().getLaunchIntentForPackage(appModel.getApplicationPackageName());
+//            if(intent==null){
+//                return;
+//            }
+//            String action = intent.getAction();
+//            if (action != null && action.contains("android.intent.category.HOME")) {
+//                RootUtils.uninstallAPK(appModel.getApplicationPackageName());
+//            }
+//        }
     }
 
     @Override

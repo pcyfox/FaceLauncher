@@ -52,14 +52,25 @@ public class HomeScreenActivity extends FragmentActivity {
         versionName.setText(AppUtils.getAppVersionName());
         TextView tvDeviceID = findViewById(R.id.tv_device_id);
         tvDeviceID.setText(Util.genClientId());
-        versionName.setOnClickListener(new View.OnClickListener() {
+        versionName.setOnClickListener(v -> {
+            count++;
+            if (count % 7 == 0) {
+                tvDeviceID.setVisibility(View.VISIBLE);
+            } else {
+                tvDeviceID.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    private void unInstallSystemLauncher() {
+        RootUtils.execCmdAsync("ps ", new Utils.Callback<ShellUtils.CommandResult>() {
             @Override
-            public void onClick(View v) {
-                count++;
-                if (count % 7 == 0) {
-                    tvDeviceID.setVisibility(View.VISIBLE);
-                } else {
-                    tvDeviceID.setVisibility(View.GONE);
+            public void onCall(ShellUtils.CommandResult data) {
+                if (data.successMsg == null) {
+                    return;
+                }
+                if (data.successMsg.contains("com.android.launcher3")) {
+                    RootUtils.uninstallAPK("com.android.launcher3");
                 }
             }
         });
@@ -72,6 +83,7 @@ public class HomeScreenActivity extends FragmentActivity {
         XLog.d(TAG + ":onPostCreate() called with: isAppRoot = [" + AppUtils.isAppRoot() + "]");
         SPStaticUtils.put("IP", IPutils.getIpAdress(this));
         initSocketManager();
+        unInstallSystemLauncher();
     }
 
     private void initSocketManager() {
