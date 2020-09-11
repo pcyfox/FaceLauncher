@@ -25,7 +25,7 @@ public class RootUtils {
     }
 
     public static void uninstallAPK(String packName) {
-        execCmdAsync("pm uninstall " + packName);
+        execCmdAsync("pm uninstall --user 0 " + packName);
     }
 
     public static void clearApp(String packName) {
