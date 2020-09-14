@@ -2,6 +2,7 @@ package ch.taike.launcher.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.GridView;
 
@@ -80,6 +81,7 @@ public class AppsGridFragment extends GridFragment implements LoaderManager.Load
         } else {
             setGridShownNoAnimation(true);
         }
+        XLog.d(TAG, "onLoadFinished() called with:  loadedApps = [" + loadedApps + "]");
         //卸载其它桌面应用
 //        for (AppModel appModel : apps) {
 //            if (appModel.getApplicationPackageName().equals(getActivity().getPackageName())) {

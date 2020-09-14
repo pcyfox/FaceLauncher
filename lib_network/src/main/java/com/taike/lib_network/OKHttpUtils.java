@@ -1,11 +1,12 @@
 package com.taike.lib_network;
 
 
-import android.util.Log;
+import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -29,7 +30,6 @@ import okhttp3.ResponseBody;
  * date : 2019-10-25 11:10
  */
 public class OKHttpUtils {
-    private static final String TAG = "OKHttpUtils";
     private static OkHttpClient okHttpClient;
     private final static MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
@@ -97,7 +97,6 @@ public class OKHttpUtils {
                 Call call = client.newCall(request);
                 Response temp = call.execute();
                 if (temp != null) {
-
                     if (temp.isSuccessful()) {
                         ResponseBody body = temp.body();
                         //call string auto close body
@@ -161,15 +160,17 @@ public class OKHttpUtils {
 
 
     public static void post(@NonNull OkHttpClient client, @NonNull String url, @NonNull String jsonData, Map<String, String> header, @NonNull Callback callback) {
-        RequestBody requestBody = RequestBody.create(jsonData, JSON);
+        if (TextUtils.isEmpty(url) || TextUtils.isEmpty(jsonData)) {
+            callback.onFailure(null, new EOFException("param error TextUtils.isEmpty(url) || TextUtils.isEmpty(jsonData)"));
+            return;
+        }
+        RequestBody requestBody = RequestBody.create(JSON, jsonData);
         Request.Builder builder = new Request.Builder().url(url).post(requestBody);
         if (header != null) {
             for (Map.Entry<String, String> entry : header.entrySet()) {
                 builder.addHeader(entry.getKey(), entry.getValue());
             }
         }
-        if (BuildConfig.DEBUG)
-            Log.d(TAG, "post() called with: client = [" + client + "], url = [" + url + "], jsonData = [" + jsonData + "], header = [" + header + "] ");
         client.newCall(builder.build()).enqueue(callback);
     }
 

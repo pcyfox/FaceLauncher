@@ -67,4 +67,18 @@ public class XLogHelper {
             CloudLogPrinter.getInstance().uploadCache();
         }
     }
+
+
+    public static void updateLogByUser() {
+        if (printer != null) {//确保初始化完成
+            CloudLogPrinter.getInstance().uploadCurrentLogs();
+        }
+    }
+
+    public static int getCurrentLogSize() {
+        if (printer == null) {
+            return -1;
+        }
+        return CloudLogPrinter.getInstance().getCurrentLogSize();
+    }
 }

@@ -15,6 +15,7 @@ import com.taike.lib_log.LogCacheManager;
 import com.taike.lib_network.RequestManager;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,6 +60,8 @@ public class CloudLogPrinter implements Printer {
     public void setQuantityInterval(int quantityInterval) {
         this.quantityInterval = quantityInterval;
     }
+
+    private volatile boolean isUpdateByUser = false;
 
     private static volatile boolean isUpdating = false;
     private float addLogCount;
@@ -162,27 +165,39 @@ public class CloudLogPrinter implements Printer {
                 addLog(tag, msg);
                 return;
             }
-            int size = mLogs.size();
-            Log.d(TAG, "upload log:-----------------> 日志已满，开始打包上传  size:" + size);
-            try {
-                List<String> temp = new ArrayList<>();
-                final StringBuilder reqContent = new StringBuilder();
-                for (int i = 0; i < size; i++) {
-                    if (i == quantityInterval) {
-                        break;
-                    }
-                    String log = mLogs.get(i);
-                    reqContent.append(log);
-                    temp.add(mLogs.get(i));
-                }
-                mLogs.removeAll(temp);
-                Log.d(TAG, "upload log:-----------------> 日志已处理,还剩size:" + mLogs.size());
-                handleUpdate(reqContent.toString(), cacheKey);
-            } catch (Exception e) {
-                e.printStackTrace();
+
+            if (isUpdateByUser) {
+                return;
             }
+            doUpdate(cacheKey);
         }
     }
+
+    private void doUpdate(String cacheKey) {
+        int size = mLogs.size();
+        Log.d(TAG, "upload log:-----------------> 日志已满，开始打包上传  size:" + size);
+        try {
+            List<String> temp = new ArrayList<>();
+            final StringBuilder reqContent = new StringBuilder();
+            for (int i = 0; i < size; i++) {
+                if (i == quantityInterval) {
+                    break;
+                }
+                String log = mLogs.get(i);
+                reqContent.append(log).append("\n");
+
+                temp.add(mLogs.get(i));
+            }
+            mLogs.removeAll(temp);
+            Log.d(TAG, "upload log:-----------------> 日志已处理,还剩size:" + mLogs.size());
+            String log = new String(reqContent.toString().getBytes(), StandardCharsets.UTF_8);
+            handleUpdate(log, cacheKey);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     private void handleUpdate(String reqContent, String cacheKey) {
         LogCache logCache = new LogCache(header, reqContent, cacheKey);
@@ -275,6 +290,38 @@ public class CloudLogPrinter implements Printer {
         });
     }
 
+
+    public void uploadCurrentLogs() {
+        XLog.d(TAG + ":uploadCurrentLogs() called");
+        if (logUpDateHandler == null || mLogs.isEmpty()) {
+            return;
+        }
+        isUpdateByUser = true;
+        logUpDateHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (mLogs) {
+                    while (!mLogs.isEmpty()) {
+                        String time = "" + SystemClock.uptimeMillis();
+                        doUpdate(LogLevel.INFO + "-" + time);
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    isUpdateByUser = false;
+                }
+            }
+        });
+    }
+
+    public int getCurrentLogSize() {
+        synchronized (mLogs) {
+            return mLogs.size();
+        }
+    }
+
     public void uploadCache() {
         logUpDateHandler.post(new Runnable() {
             @Override
@@ -284,7 +331,7 @@ public class CloudLogPrinter implements Printer {
                     XLog.i(TAG + ":------------------uploadCache() called----------------------  size=" + caches.size());
                 }
                 for (LogCache logCache : caches) {
-                    if (logCache != null) {
+                    if (logCache != null && !TextUtils.isEmpty(logCache.getLogContent())) {
                         realUpdate(logCache.getHeader(), logCache.getLogContent(), logCache.getCacheKey());
                     }
                 }

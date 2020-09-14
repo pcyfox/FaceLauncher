@@ -25,6 +25,7 @@ import com.blankj.utilcode.util.ToastUtils;
 import com.blankj.utilcode.util.Utils;
 import com.elvishew.xlog.XLog;
 import com.taike.lib_common.config.AppConfig;
+import com.taike.lib_log.XLogHelper;
 import com.taike.lib_utils.IPutils;
 import com.taike.lib_utils.Util;
 import com.tk.launcher.BuildConfig;
@@ -184,6 +185,12 @@ public class HomeScreenActivity extends FragmentActivity {
     @Override
     public void onBackPressed() {
 
+    }
+
+    @Override
+    protected void onStop() {
+        XLogHelper.updateLogByUser();
+        super.onStop();
     }
 
     @Override
