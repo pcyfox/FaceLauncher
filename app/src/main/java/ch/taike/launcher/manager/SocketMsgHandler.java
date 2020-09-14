@@ -85,7 +85,7 @@ public class SocketMsgHandler {
                     if (messageInterceptor != null && messageInterceptor.intercept(launcherMessage)) {
                         return;
                     }
-                    ToastUtils.showShort(msg);
+                    if (BuildConfig.DEBUG) ToastUtils.showShort(msg);
                     String data = launcherMessage.getData();
                     Action action = launcherMessage.getAction();
 

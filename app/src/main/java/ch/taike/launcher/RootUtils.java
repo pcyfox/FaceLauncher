@@ -8,6 +8,7 @@ import com.blankj.utilcode.util.ShellUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.blankj.utilcode.util.Utils;
 import com.elvishew.xlog.XLog;
+import com.tk.launcher.BuildConfig;
 
 public class RootUtils {
     private static final String TAG = "RootUtils";
@@ -56,7 +57,7 @@ public class RootUtils {
             @Override
             public void onCall(ShellUtils.CommandResult data) {
                 XLog.i(TAG + ":adb execCmdAsync called with:cmd=" + cmd + ",result= [" + data + "]");
-                if (data != null) {
+                if (data != null && (BuildConfig.DEBUG)) {
                     if (data.result == 0) {
                         ToastUtils.showShort("执行成功！");
                     } else {

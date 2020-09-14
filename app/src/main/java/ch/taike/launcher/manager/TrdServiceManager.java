@@ -13,6 +13,8 @@ import com.taike.lib_log.printer.PrintLogReq;
 import com.taike.lib_utils.CrashHandlerUtils;
 import com.taike.lib_utils.Util;
 
+import java.util.Map;
+
 
 /**
  * 第三方库管理类
@@ -24,16 +26,15 @@ public final class TrdServiceManager {
     private static final String TAG = "TrdService";
 
     public static void initLog(String clientName, String ELKUrl) {
-        Log.d(TAG, "initLog() called with: clientName = [" + clientName + "], ELKUrl = [" + ELKUrl + "]");
-        PrintLogReq printLogReq = new PrintLogReq(clientName,
-                Util.genClientId(),
-                BuildConfig.DEBUG,
-                BuildConfig.BASE_URL,
-                "" + AppUtils.getAppVersionCode());
-
+        PrintLogReq printLogReq = new PrintLogReq();
         CloudLogPrinter cloudLogPrinter = CloudLogPrinter.getInstance();
+        Map<String, String> header = cloudLogPrinter.getHeader();
+        header.put("client_name", clientName);
+        header.put("device_id", Util.genClientId());
+        header.put("server_type", BuildConfig.BASE_URL);
+        header.put("app_version_code", "" + AppUtils.getAppVersionCode());
+        header.put("is_debug", "" + BuildConfig.DEBUG);
         cloudLogPrinter.init(printLogReq, ELKUrl, clientName);
-        cloudLogPrinter.setQuantityInterval(5);
         XLogHelper.initLog(cloudLogPrinter, AppConfig.getLogPath(), clientName, clientName);
     }
 

@@ -22,7 +22,6 @@ import com.blankj.utilcode.util.PermissionUtils;
 import com.blankj.utilcode.util.SPStaticUtils;
 import com.blankj.utilcode.util.ShellUtils;
 import com.blankj.utilcode.util.ToastUtils;
-import com.blankj.utilcode.util.Utils;
 import com.elvishew.xlog.XLog;
 import com.taike.lib_common.config.AppConfig;
 import com.taike.lib_log.XLogHelper;
@@ -61,18 +60,16 @@ public class HomeScreenActivity extends FragmentActivity {
                 tvDeviceID.setVisibility(View.GONE);
             }
         });
+        getRunningApp();
     }
 
     private void unInstallSystemLauncher() {
-        RootUtils.execCmdAsync("ps ", new Utils.Callback<ShellUtils.CommandResult>() {
-            @Override
-            public void onCall(ShellUtils.CommandResult data) {
-                if (data.successMsg == null) {
-                    return;
-                }
-                if (data.successMsg.contains("com.android.launcher3")) {
-                    RootUtils.uninstallAPK("com.android.launcher3");
-                }
+        RootUtils.execCmdAsync("ps ", data -> {
+            if (data.successMsg == null) {
+                return;
+            }
+            if (data.successMsg.contains("com.android.launcher3")) {
+                RootUtils.uninstallAPK("com.android.launcher3");
             }
         });
     }
@@ -113,19 +110,17 @@ public class HomeScreenActivity extends FragmentActivity {
     }
 
     public void getRunningApp() {
-        RootUtils.execCmdAsync("ps", new Utils.Callback<ShellUtils.CommandResult>() {
-            @Override
-            public void onCall(ShellUtils.CommandResult data) {
-                XLog.e(TAG + ":onCall() called with ps: data = [" + data + "]");
-            }
-        });
+        RootUtils.execCmdAsync("ps", data -> XLog.i(TAG + ":onCall() called with ps: data = [" + data + "]"));
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
 
     @Override
     protected void onPostResume() {
         super.onPostResume();
-        getRunningApp();
         PermissionUtils.permission(PermissionConstants.STORAGE).request();
         String ip = SPStaticUtils.getString("IP");
         if (!TextUtils.isEmpty(ip)) {

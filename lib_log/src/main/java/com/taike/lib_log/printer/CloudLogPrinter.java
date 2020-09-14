@@ -6,10 +6,13 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.blankj.utilcode.util.GsonUtils;
+import com.blankj.utilcode.util.TimeUtils;
 import com.elvishew.xlog.LogLevel;
 import com.elvishew.xlog.XLog;
 import com.elvishew.xlog.printer.Printer;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.taike.lib_log.LogCache;
 import com.taike.lib_log.LogCacheManager;
 import com.taike.lib_network.RequestManager;
@@ -75,6 +78,7 @@ public class CloudLogPrinter implements Printer {
         handlerThread.start();
         logUpDateHandler = new Handler(handlerThread.getLooper());
     }
+
 
     /**
      * @param printLogReq 自定义打印类对象
@@ -184,15 +188,13 @@ public class CloudLogPrinter implements Printer {
                     break;
                 }
                 String log = mLogs.get(i);
-                reqContent.append(log).append("\n");
-
+                reqContent.append(log).append("\n\n");
                 temp.add(mLogs.get(i));
             }
             mLogs.removeAll(temp);
             Log.d(TAG, "upload log:-----------------> 日志已处理,还剩size:" + mLogs.size());
             String log = new String(reqContent.toString().getBytes(), StandardCharsets.UTF_8);
             handleUpdate(log, cacheKey);
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -256,13 +258,13 @@ public class CloudLogPrinter implements Printer {
     }
 
     private String createLog(String tag, String msg) {
-        TimeZone timeZone = TimeZone.getTimeZone("Asia/Shanghai");
         // format1.setTimeZone(timeZone);
         StringBuilder reqLogItem = new StringBuilder();
-        format2.setTimeZone(timeZone);
-        String pTs = format2.format(getTime()) + "+0800";
-        printLogReq.initBaseLogReq(tag, msg, pTs);
-        reqLogItem.append(new Gson().toJson(printLogReq)).append("\n");
+        Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+        printLogReq.msg = msg;
+        // printLogReq.tag = tag;
+        printLogReq.ts = TimeUtils.millis2String(System.currentTimeMillis());
+        reqLogItem.append(gson.toJson(printLogReq));
         return reqLogItem.toString();
     }
 
